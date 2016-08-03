@@ -1,13 +1,6 @@
-
-# coding: utf-8
-
-# In[1]:
-
-#%matplotlib nbagg
-#%matplotlib inline
+import doseresponse as dr
 import numpy as np
 import numpy.random as npr
-import pandas as pd
 import itertools as it
 import time
 import os
@@ -19,11 +12,6 @@ import matplotlib.pyplot as plt
 import sys
 #matplotlib.rcParams.update({'font.size': 22})
 import warnings
-#warnings.filterwarnings("error")
-#settings = np.seterr(all='warn')
-
-
-# In[2]:
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-i", "--iterations", type=int, help="number of MCMC iterations",default=1000000)
@@ -34,52 +22,7 @@ parser.add_argument("-p", "--predictions", type=int, help="number of prediction 
 args = parser.parse_args()
 num_params = args.num_params+1
 
-
-# In[3]:
-
-file_name = 'python_input_data.csv'
-df = pd.read_csv(file_name, names=['Drug','Channel','Experiment','Concentration','Inhibition'])
-drugs = df.Drug.unique()
-channels = df.Channel.unique()
-
-if not args.all:
-    print "\nDrugs:\n"
-    for i in range(len(drugs)):
-        print "{}. {}".format(i+1,drugs[i])
-    drug_index = int(raw_input("\nSelect drug number: "))-1
-    assert(0 <= drug_index < len(drugs))
-    drug = drugs[drug_index]
-    print "\nChannels:\n"
-    for i in range(len(channels)):
-        print "{}. {}".format(i+1,channels[i])
-    channel_index = int(raw_input("\nSelect channel number: "))-1
-    assert(0 <= channel_index < len(channels))
-    channel = channels[channel_index]
-    drugs_to_run = [drug]
-    channels_to_run = [channel]
-else:
-    drugs_to_run = drugs
-    channels_to_run = channels
-
-
-# In[25]:
-
-def output_paths(drug,channel):
-    output_dir = 'output/hierarchical/drugs/{}/{}/'.format(drug,channel)
-    chain_dir = output_dir+'chain/'
-    figs_dir = output_dir+'figures/'
-    dirs = [output_dir,chain_dir,figs_dir]
-    for directory in dirs:
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-    chain_file = chain_dir+'{}_{}_hierarchical_chain.txt'.format(drug,channel)
-    return chain_file,figs_dir
-
-def dose_response_model(dose,hill,IC50):
-    return 100. * ( 1. - 1./(1.+(1.*dose/IC50)**hill) )
-
-def pic50_to_ic50(pic50): # IC50 in uM
-    return 10**(6-pic50)
+drugs_to_run, channels_to_run = dr.list_drug_channel_options(args.all)
 
 def log_likelihood(measurements,doses,theta):
     if num_params==3:
@@ -90,8 +33,8 @@ def log_likelihood(measurements,doses,theta):
         hill = 1
         pIC50 = theta[0]
         sigma = theta[1]
-    IC50 = pic50_to_ic50(pIC50)
-    return -len(measurements) * np.log(sigma) - np.sum((measurements-dose_response_model(doses,hill,IC50))**2)/(2.*sigma**2)
+    IC50 = dr.pic50_to_ic50(pIC50)
+    return -len(measurements) * np.log(sigma) - np.sum((measurements-dr.dose_response_model(doses,hill,IC50))**2)/(2.*sigma**2)
     # as usual in our MCMC, omitted the -n/2*log(2pi) term from the log-likelihood, as this is always cancelled out
     
 def sum_of_square_diffs(unscaled_params,doses,responses):
@@ -99,10 +42,10 @@ def sum_of_square_diffs(unscaled_params,doses,responses):
     #pIC50 = pic50_prior[0] + 0.5*(pic50_prior[1]-pic50_prior[0]) * (1-np.cos(np.pi/2*unscaled_params[1]))
     hill = unscaled_params[0]**2
     pIC50 = unscaled_params[1]**2-1
-    IC50 = pic50_to_ic50(pIC50)
+    IC50 = dr.pic50_to_ic50(pIC50)
     if num_params==2: # this is still quick, but maybe worth using different solver (CMA-ES doesn't do 1d) for loads of data points
         hill = 1
-    test_responses = dose_response_model(doses,hill,IC50)
+    test_responses = dr.dose_response_model(doses,hill,IC50)
     return np.sum((test_responses-responses)**2)
 
 def initial_sigma(n,sum_of_squares):
@@ -112,11 +55,11 @@ def log_data_likelihood(hill_is,pic50_is,sigma,experiments):
     Ne = len(experiments)
     answer = 0.
     for i in range(Ne):
-        ic50 = pic50_to_ic50(pic50_is[i])
+        ic50 = dr.pic50_to_ic50(pic50_is[i])
         concs = experiments[i][:,0]
         num_expt_pts = len(concs)
         data = experiments[i][:,1]
-        model_responses = dose_response_model(concs,hill_is[i],ic50)
+        model_responses = dr.dose_response_model(concs,hill_is[i],ic50)
         exp_bit = np.sum((data-model_responses)**2)/(2*sigma**2)
         truncated_scale = np.sum(np.log(st.norm.cdf(100,model_responses,sigma)-st.norm.cdf(0,model_responses,sigma)))
         answer -= (num_expt_pts*np.log(sigma) + exp_bit + truncated_scale)
@@ -277,29 +220,9 @@ def run(drug,channel):
     except:
         print "cma module not installed or something."
         sys.exit()
-
-
-    experiment_numbers = np.array(df[(df['Drug'] == drug) & (df['Channel'] == channel)].Experiment.unique())
-    num_expts = max(experiment_numbers)
-
-    experiments = []
-    for expt in experiment_numbers:
-        experiments.append(np.array(df[(df['Drug'] == drug) & (df['Channel'] == channel) & (df['Experiment'] == expt)][['Concentration','Inhibition']]))
-
-    for expt in experiments:
-        print expt
-
-    experiment_numbers -= 1
-    print experiment_numbers
-
-
-    if ('/' in drug):
-        drug = drug.replace('/','_')
-    if ('/' in channel):
-        channel = channel.replace('/','_')
-
-    chain_file, figs_dir = output_paths(drug,channel)
-
+    
+    num_expts, experiment_numbers, experiments = dr.load_crumb_data(drug,channel)
+    drug, channel, output_dir, chain_dir, figs_dir, chain_file = dr.hierarchical_output_dirs_and_chain_file(drug,channel)
 
     best_fits = []
     for expt in experiment_numbers:
@@ -343,7 +266,7 @@ def run(drug,channel):
     for expt in experiment_numbers:
         print expt
         print colors[expt]
-        ax.plot(x,dose_response_model(x,best_fits[expt,0],pic50_to_ic50(best_fits[expt,1])),color=colors[expt])#,label='Expt {} best fit'.format(expt+1))
+        ax.plot(x,dr.dose_response_model(x,best_fits[expt,0],dr.pic50_to_ic50(best_fits[expt,1])),color=colors[expt])#,label='Expt {} best fit'.format(expt+1))
         ax.scatter(experiments[expt][:,0],experiments[expt][:,1],label='Expt {}'.format(expt+1),color=colors[expt],s=100)
     ax.set_ylim(0,100)
     ax.set_xlim(min(x),max(x))
@@ -494,7 +417,7 @@ def run(drug,channel):
     acceptance = 0.
     target_acceptance = 0.25
 
-    thinning = 1
+    thinning = 5
 
     try:
         total_iterations = args.iterations
@@ -502,8 +425,8 @@ def run(drug,channel):
         total_iterations = 200000
     status_when = 10000
     saved_iterations = total_iterations/thinning+1
-    pre_thin_burn = total_iterations/2
-    burn = saved_iterations/2
+    pre_thin_burn = total_iterations/4
+    burn = saved_iterations/4
 
     chain = np.zeros((saved_iterations,dim+1))
     chain[0,:] = np.copy(np.concatenate((first_iteration,[log_target_cur])))
@@ -654,7 +577,7 @@ def run(drug,channel):
         ax1_2.scatter(experiments[i][:,0],experiments[i][:,1],s=markersize,color=colors[i],zorder=10,label='Experiment {}'.format(i+1))
         #index_samples = npr.randint(burn,saved_iterations,fraction_to_plot)
         for index in index_samples[i*fraction_to_plot:(i+1)*fraction_to_plot]:
-            prediction_curve = dose_response_model(x,chain[index,4+i*2],pic50_to_ic50(chain[index,5+i*2]))
+            prediction_curve = dr.dose_response_model(x,chain[index,4+i*2],dr.pic50_to_ic50(chain[index,5+i*2]))
             ax1.plot(x,prediction_curve,color=colors[i],alpha=0.01)
             ax1_2.plot(x,prediction_curve,color=colors[i],alpha=0.01)
     ax1.set_ylabel('% {} block'.format(channel))
@@ -677,7 +600,7 @@ def run(drug,channel):
     for index in index_samples:
         hill = st.fisk.rvs(c=chain[index,1],scale=chain[index,0])
         pic50 = npr.logistic(chain[index,2],chain[index,3])
-        prediction_curve = dose_response_model(x,hill,pic50_to_ic50(pic50))
+        prediction_curve = dr.dose_response_model(x,hill,dr.pic50_to_ic50(pic50))
         ax2.plot(x,prediction_curve,color='black',alpha=0.01)
         ax2_2.plot(x,prediction_curve,color='black',alpha=0.01)
     ax2.set_ylabel('% {} block'.format(channel))
@@ -700,7 +623,7 @@ def run(drug,channel):
     for index in index_samples:
         hill_mode = log_logistic_mode(chain[index,0],chain[index,1])
         pic50_mode = logistic_mode(chain[index,2],chain[index,3])
-        prediction_curve = dose_response_model(x,hill_mode,pic50_to_ic50(pic50_mode))
+        prediction_curve = dr.dose_response_model(x,hill_mode,dr.pic50_to_ic50(pic50_mode))
         ax3.plot(x,prediction_curve,color='black',alpha=0.01)
         ax3_2.plot(x,prediction_curve,color='black',alpha=0.01)
     ax3.set_xlabel(r'{} concentration ($\mu$M)'.format(drug))

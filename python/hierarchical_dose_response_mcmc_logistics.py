@@ -9,9 +9,10 @@ import scipy.stats as st
 #import matplotlib
 #matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 import sys
 #matplotlib.rcParams.update({'font.size': 22})
-import warnings
+#import warnings
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-i", "--iterations", type=int, help="number of MCMC iterations",default=1000000)
@@ -19,6 +20,7 @@ parser.add_argument("-n", "--num_params", type=int, help="number of parameters t
 parser.add_argument("-a", "--all", action='store_true', help='run hierarchical MCMC on all drugs and channels', default=False)
 parser.add_argument('-ppp', '--plot-parameter-paths', action='store_true', help='plot the path taken by each parameter through the (thinned) MCMC',default=False)
 parser.add_argument("-p", "--predictions", type=int, help="number of prediction curves to plot",default=1000)
+parser.add_argument("-c", "--num-cores", type=int, help="number of cores to parallelise drug/channel combinations",default=1)
 args = parser.parse_args()
 num_params = args.num_params+1
 
@@ -210,7 +212,9 @@ def log_pic50_mu_prior(x,uniform_lower_bound=-2,uniform_upper_bound=7,scale=10):
 
 # In[26]:
 
-def run(drug,channel):
+def run(drug_channel):
+
+    drug, channel = drug_channel
 
     seed = 1
     num_params = 3
@@ -262,7 +266,9 @@ def run(drug,channel):
     xmax = int(np.log10(xmax))+2
     num_x_pts = 101
     x = np.logspace(xmin,xmax,num_x_pts)
-    colors = ['red','blue','orange','cyan','purple']
+    colors = ['#a6cee3','#1f78b4','#b2df8a','#33a02c','#fb9a99','#e31a1c','#fdbf6f','#ff7f00','#cab2d6','#6a3d9a','#ffff99','#b15928']
+    if (num_expts>len(colors)):
+        sys.exit('\nNot enough colours to plot the CMA-ES best fits. How pathetic.\n')
     for expt in experiment_numbers:
         print expt
         print colors[expt]
@@ -437,7 +443,7 @@ def run(drug,channel):
     t = 1
     first_nonpos_cov = 0
     while t <= total_iterations:
-        with warnings.catch_warnings(record=True) as w:
+        """with warnings.catch_warnings(record=True) as w:
             # Cause all warnings to always be triggered.
             warnings.simplefilter("always")
             # Trigger a warning.
@@ -449,8 +455,8 @@ def run(drug,channel):
                 if first_nonpos_cov == 0:
                     first_nonpos_cov = t
                     bad_loga = loga
-                    break
-
+                    break"""
+        theta_star = npr.multivariate_normal(theta_cur,np.exp(loga)*cov_cur)
         log_target_star = log_target_distribution(experiments,theta_star,shapes,scales,locs)
         accept_prob = npr.rand()
         if (np.log(accept_prob) < log_target_star - log_target_cur):
@@ -669,13 +675,19 @@ def run(drug,channel):
 
     print "\n\n{} + {} complete!\n\n".format(drug,channel)
 
-
-# In[29]:
-
-for drug,channel in it.product(drugs_to_run,channels_to_run):
-    run(drug,channel)
-    """try:
-        run(drug,channel)
-    except:
-        print "Failed to run {} + {}!".format(drug,channel)"""
+drugs_channels = it.product(drugs_to_run,channels_to_run)
+if (args.num_cores<=1) or (len(drugs_to_run)==1):
+    for drug_channel in drugs_channels:
+        #run(drug_channel)
+        try:
+            run(drug,channel)
+        except:
+            print "Failed to run {} + {}!".format(drug,channel)
+elif (args.num_cores>1):
+    import multiprocessing as mp
+    num_cores = min(args.num_cores, mp.cpu_count()-1)
+    pool = mp.Pool(processes=num_cores)
+    pool.map_async(run,drugs_channels).get(9999999)
+    pool.close()
+    pool.join()
 

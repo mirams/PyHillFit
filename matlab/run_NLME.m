@@ -1,6 +1,6 @@
-function run_NLME(drug,channel)
+function run_NLME()
 
-    [expts,concs,responses] = load_drug_channel(drug,channel);
+    [expts,concs,responses] = load_drug_channel();
 
     num_expts = max(expts);
     assert(num_expts>1,...
@@ -17,6 +17,7 @@ function run_NLME(drug,channel)
     xmin = -4;
     xmax = 4;
     conc = unique(concs)'
+    close all
     h = plot(conc,responses,'o','LineWidth',2);
     xlabel('Concentration (\muM)')
     ylabel('% block')

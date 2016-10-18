@@ -31,7 +31,7 @@ and then copy these files into
 ```
 ApPredict/test/
 ```
-and run the simulations with
+and run the simulations from the Chaste folder, with:
 ```
 scons cl=1 b=GccOptNative projects/ApPredict/test/TestCrumbPredictions.hpp
 ```

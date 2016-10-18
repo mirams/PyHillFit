@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Python output
+python/output/
+
 # Temporary Files
 *~
 

@@ -4,7 +4,7 @@ For performing the uncertainty propagation simulations.
 
 ## Pre-requisites
 
- * `Chaste` - from www.github.com/Chaste/Chaste
+ * `Chaste` - from www.github.com/Chaste/Chaste (following the installation instructions at https://chaste.cs.ox.ac.uk/trac/wiki/InstallGuides/InstallGuide)
  * `ApPredict` - from www.github.com/Chaste/ApPredict
 
 The files in this folder should be copied into `ApPredict/test`.

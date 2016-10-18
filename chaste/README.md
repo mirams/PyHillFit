@@ -33,7 +33,7 @@ cd ApPredict
 git checkout a38aafa02ee21c2825bc14e5efc07c7ef8626b01
 cd ..
 ```
-Here we have hardcoded two particular revisions of Chaste and ApPredict that are known to work with these files.
+Here we have hardcoded two particular revisions of Chaste and ApPredict (c. 18th October 2016) that are known to work with these files.
 
 Then link ApPredict so it can be built as a Chaste project:
 ```

@@ -4,10 +4,6 @@ clear all
 % Get the list of drugs we are using
 d = importdata('drug_list.txt',' ',1);
 drug_names = d.textdata(2:end,1);
-risks = d.data(:,2);
-colours = [1 0 0      % Red
-           1 0.5 0    % Orange
-           0 0.8 0];  % Green
        
 colour_order = distinguishable_colors(length(drug_names));
        

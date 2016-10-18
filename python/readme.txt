@@ -37,3 +37,7 @@ and again select from the menu.
 Everything will be saved in python/output/ + a very verbose and hopefully easy-to-follow chain of subdirectories.
 
 After running the hierarchical MCMC, (alpha,mu) samples will be automatically saved into chaste/samples/ for later use in AP predictions.
+
+
+For synthetic data, you can add your own in data/synthetic_data.csv, just keep the same format and you can add your own fictitious drugs on the end, and they'll be presented to you in the list.
+Remember to use the -sy flag for synthetic data.

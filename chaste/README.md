@@ -4,7 +4,7 @@ For performing the uncertainty propagation simulations.
 
 ## Pre-requisites
 
- * `Chaste` - from www.github.com/Chaste/Chaste
+ * `Chaste` - from www.github.com/Chaste/Chaste (following the installation instructions at https://chaste.cs.ox.ac.uk/trac/wiki/InstallGuides/InstallGuide)
  * `ApPredict` - from www.github.com/Chaste/ApPredict
 
 The files in this folder should be copied into `ApPredict/test`.
@@ -31,6 +31,7 @@ and then copy all the contents of the folder this README is in, to:
 ```
 ApPredict/test/
 ```
+(you could put it somewhere else, but there are hard-coded paths that assume this is where the data files will be)
 and run the simulations from the Chaste folder, with:
 ```
 scons cl=1 b=GccOptNative projects/ApPredict/test/TestCrumbPredictions.hpp

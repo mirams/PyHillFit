@@ -51,9 +51,6 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "CrumbDataReader.hpp"
 #include "CrumbDrugList.hpp"
 
-// To specify hierarchical or not
-#include <CommandLineArguments.hpp>
-
 // Should always be last
 #include "PetscSetupAndFinalize.hpp"
 
@@ -62,7 +59,7 @@ class TestCrumbPredictions : public CxxTest::TestSuite
 public:
     void TestCrumbDrugListReader(void) throw(Exception)
     {
-        FileFinder file("projects/GaryM/test/private_data/crumb_study/drug_list.txt", RelativeTo::ChasteSourceRoot);
+        FileFinder file("projects/ApPredict/test/drug_list.txt", RelativeTo::ChasteSourceRoot);
 
         if (!file.Exists())
         {
@@ -85,42 +82,13 @@ public:
         TS_ASSERT_DELTA(drug_list.GetClinicalDose("Ranolazine") , 1.9482, 1e-9);
     }
 
-    void TestCrumbInferredDoseResponseSamplesReader(void) throw(Exception)
-    {
-        unsigned num_params = 2u;
-        std::string drug_name = "Amiodarone";
-        std::stringstream file_path;
-        file_path << "projects/GaryM/test/private_data/crumb_study/standard_mcmc/num_params_"
-                  << num_params << "/" << drug_name << "_hERG_num_params_" << num_params << "_hill_pic50.txt";
-        FileFinder drug_file_name(file_path.str(), RelativeTo::ChasteSourceRoot);
-        CrumbDataReader data_reader(drug_file_name, num_params);
-
-        TS_ASSERT_THROWS_THIS(data_reader.GetHillSample(1e9),
-                              "Sample index 1000000000 requested, but the number of samples in the data file is 500.");
-        TS_ASSERT_THROWS_THIS(data_reader.GetPic50Sample(1e9),
-                              "Sample index 1000000000 requested, but the number of samples in the data file is 500.");
-
-        TS_ASSERT_DELTA(data_reader.GetPic50Sample(0u),5.836964934087349732e+00, 1e-12);
-        TS_ASSERT_DELTA(data_reader.GetPic50Sample(1u),5.862863573409464735e+00, 1e-12);
-        TS_ASSERT_DELTA(data_reader.GetPic50Sample(499u),6.134491843253357501e+00, 1e-12);
-
-        TS_ASSERT_DELTA(data_reader.GetHillSample(0u),5.707994444688915259e-01, 1e-12);
-        TS_ASSERT_DELTA(data_reader.GetHillSample(1u),4.787830248016846646e-01, 1e-12);
-        TS_ASSERT_DELTA(data_reader.GetHillSample(499u),5.957891765182190547e-01, 1e-12);
-    }
-
     void TestApdPredictionsForCrumbData() throw (Exception)
     {
         const unsigned num_samples = 500u;
-        //const unsigned num_samples = 10u;
         unsigned num_params = 2u;
-        bool only_herg_cav = false;
-        bool hierarchical = CommandLineArguments::Instance()->OptionExists("--hierarchical");
-
-
 
         // Load up the drug data
-        FileFinder file("projects/GaryM/test/private_data/crumb_study/drug_list.txt", RelativeTo::ChasteSourceRoot);
+        FileFinder file("projects/ApPredict/test/drug_list.txt", RelativeTo::ChasteSourceRoot);
         if (!file.Exists())
         {
             std::cout << "Data file not available." << std::endl;
@@ -141,43 +109,9 @@ public:
                 ("membrane_fast_transient_outward_current_conductance")
                 ("membrane_inward_rectifier_potassium_current_conductance");
 
-        std::vector<std::string> subset_drugs;
-        if (CommandLineArguments::Instance()->OptionExists("--drugs"))
-        {
-            subset_drugs = CommandLineArguments::Instance()->GetStringsCorrespondingToOption("--drugs");
-        }
-
+        unsigned model_idx = 6u; // ApPredict code for O'Hara endo model.
         std::stringstream output_folder;
-        output_folder << "CrumbDataStudy_model_";
-
-        unsigned model_idx = 6u;
-        if (CommandLineArguments::Instance()->OptionExists("--cellml"))
-        {
-            std::string model_name = CommandLineArguments::Instance()->GetStringCorrespondingToOption("--cellml");
-            FileFinder finder(model_name, RelativeTo::CWD);
-            output_folder << finder.GetLeafNameNoExtension();
-        }
-        else
-        {
-            if (CommandLineArguments::Instance()->OptionExists("--model"))
-            {
-                model_idx = CommandLineArguments::Instance()->GetUnsignedCorrespondingToOption("--model");
-            }
-            output_folder << model_idx;
-        }
-
-        output_folder << "_num_params_" << num_params << "_num_samples_" << num_samples;
-
-        if(only_herg_cav)
-        {
-            output_folder << "_hERG_and_CaL_only";
-        }
-
-        if (hierarchical)
-        {
-            output_folder << "_hierarchical";
-        }
-
+        output_folder << "CrumbDataStudy_num_params_" << num_params << "_num_samples_" << num_samples;
 
         // Set up an output directory - must be called collectively.
         boost::shared_ptr<OutputFileHandler> p_base_handler(new OutputFileHandler(output_folder.str(), false)); // Don't wipe the folder, we might be re-running one drug!
@@ -202,13 +136,6 @@ public:
             const std::string drug_name = drug_list.GetDrugName(drug_idx);
             double concentration = drug_list.GetClinicalDose(drug_name);
 
-            // If we are just doing a subset, and this drug isn't in the list, then skip it.
-            if (subset_drugs.size()>0u && std::find(subset_drugs.begin(), subset_drugs.end(), drug_name) == subset_drugs.end())
-            {
-                // Don't examine this compound
-                continue;
-            }
-
             // If we are running in parallel share out the drugs between processes.
             if (drug_idx % PetscTools::GetNumProcs() != PetscTools::GetMyRank())
             {
@@ -216,20 +143,8 @@ public:
                 continue;
             }
 
-            boost::shared_ptr<AbstractCvodeCell> p_model;
-
-            if (CommandLineArguments::Instance()->OptionExists("--model") || CommandLineArguments::Instance()->OptionExists("--cellml"))
-            {
-                // Create a fresh model for this drug - SetupModel contains command line arg processing for which.
-                boost::shared_ptr<OutputFileHandler> p_individual_handler(new OutputFileHandler(output_folder.str(), true));
-                SetupModel setup(1.0,UNSIGNED_UNSET,p_individual_handler);
-                p_model = setup.GetModel();
-            }
-            else
-            {
-                SetupModel setup(1.0, 6u); // Use an O'Hara model
-                p_model = setup.GetModel();
-            }
+            SetupModel setup(1.0, 6u); // Use an O'Hara model
+            boost::shared_ptr<AbstractCvodeCell> p_model = setup.GetModel();
 
             // Run to steady state and record state variables
             SteadyStateRunner steady_runner(p_model);
@@ -271,16 +186,9 @@ public:
             for (unsigned channel_idx = 0; channel_idx < channels.size(); channel_idx++)
             {
                 std::stringstream file_path;
-                if (hierarchical)
-                {
-                    file_path << "projects/GaryM/test/private_data/crumb_study/hierarchical_mcmc/"
+                file_path << "projects/ApPredict/test/samples/"
                               << drug_name << "_" << channels[channel_idx] << "_hill_pic50_samples.txt";
-                }
-                else
-                {
-                    file_path << "projects/GaryM/test/private_data/crumb_study/standard_mcmc/num_params_" << num_params << "/"
-                              << drug_name << "_" << channels[channel_idx] <<"_num_params_" << num_params << "_hill_pic50.txt";
-                }
+                
                 FileFinder drug_file_name(file_path.str(), RelativeTo::ChasteSourceRoot);
                 CrumbDataReader data_reader(drug_file_name, num_params);
                 data_readers.push_back(data_reader);
@@ -292,11 +200,6 @@ public:
                 // Add some sample drug pIC50 and Hill coefficient for this sample
                 for (unsigned channel_idx = 0; channel_idx < channels.size(); channel_idx++)
                 {
-                    // hERG is hard-coded as Channel index 0 and CaL as channel index 3.
-                    if (only_herg_cav && channel_idx!=0u && channel_idx!=3u)
-                    {
-                        continue;
-                    }
                     if (p_model->HasParameter(ap_predict_channels[channel_idx]))
                     {
                         double ic50 = AbstractDataStructure::ConvertPic50ToIc50(data_readers[channel_idx].GetPic50Sample(sample));

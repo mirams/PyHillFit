@@ -10,7 +10,7 @@ colour_order = distinguishable_colors(length(drug_names));
 for drug_idx = 1:length(drug_names)
     
     % Open the data file for each drug
-    filename = [getenv('CHASTE_TEST_OUTPUT') '/CrumbDataStudy_num_params_2_num_samples_501/' drug_names{drug_idx} '_apd90_results.dat']
+    filename = [getenv('CHASTE_TEST_OUTPUT') '/CrumbDataStudy_num_params_2_num_samples_500/' drug_names{drug_idx} '_apd90_results.dat']
     d = importdata(filename,'\t',1);
     
     % If it ran OK there will be a structure d.data

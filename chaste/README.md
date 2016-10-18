@@ -27,7 +27,7 @@ git clone https://github.com/Chaste/ApPredict.git
 cd Chaste/projects
 ln -s ../../ApPredict
 ```
-and then copy these files into
+and then copy all the contents of the folder this README is in, to:
 ```
 ApPredict/test/
 ```

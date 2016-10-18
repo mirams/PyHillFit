@@ -10,12 +10,12 @@ The following packages are pre-requisites for running `dose-response-fitting`:
 
 We have made a .csv file of the [Crumb et al.](http://dx.doi.org/10.1016/j.vascn.2016.03.009) dataset, which is available in the `data` folder, together with some example python scripts for reading it.
 
-## Running the code
+## Running the dose-response fitting code
 
-### Single-level dose-response fitting
+### Single-level fitting
 
-### Hierarchical dose-response fitting
+### Hierarchical fitting
 
-### Uncertainty Propagation
+## Uncertainty Propagation
 
 To run the Uncertainty Propagation example, see the [README](chaste/README.md) in the `chaste` folder.

@@ -20,7 +20,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-c", "--concs", nargs="+", type=float, help="drug concentrations at which to find predicted responses",default=[])
 parser.add_argument("-a", "--all", action='store_true', help='plot histograms from hierarchical MCMC on all drugs and channels', default=False)
 parser.add_argument("-nc", "--num-cores", type=int, help="number of cores to parallelise drug/channel combinations",default=1)
-parser.add_argument("-s", "--synthetic", action='store_true', help="use synthetic data (only one drug/channel combination exists currently", default=False)
+parser.add_argument("-sy", "--synthetic", action='store_true', help="use synthetic data (only one drug/channel combination exists currently", default=False)
 parser.add_argument("-Ne", "--num_expts", type=int, help="how many synthetic experiments to fit to",default=0)
 args = parser.parse_args()
 

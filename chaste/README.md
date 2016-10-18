@@ -19,15 +19,28 @@ The files in this folder should be copied into `ApPredict/test`.
 
 ## Running the simulations
 
-Should be as simple as getting a copy of Chaste and ApPredict, e.g.
-
+Should be as simple as getting a copy of Chaste:
 ```
 git clone https://github.com/Chaste/Chaste.git
-git clone https://github.com/Chaste/ApPredict.git
+cd Chaste
+git checkout 4dc2ad3264b92b6d1871cf4277e591a1fa70ebf7
+cd ..
+```
+Then a copy of ApPredict:
+```
+git clone --recursive https://github.com/Chaste/ApPredict.git
+cd ApPredict
+git checkout a38aafa02ee21c2825bc14e5efc07c7ef8626b01
+cd ..
+```
+Here we have hardcoded two particular revisions of Chaste and ApPredict that are known to work with these files.
+
+Then link ApPredict so it can be built as a Chaste project:
+```
 cd Chaste/projects
 ln -s ../../ApPredict
 ```
-and then copy all the contents of the folder this README is in, to:
+Then copy all the contents of the folder this README is in, to:
 ```
 ApPredict/test/
 ```

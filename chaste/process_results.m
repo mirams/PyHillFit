@@ -10,7 +10,7 @@ colour_order = distinguishable_colors(length(drug_names));
 for drug_idx = 1:length(drug_names)
     
     % Open the data file for each drug
-    filename = [getenv('CHASTE_TEST_OUTPUT') '/CrumbDataStudy_num_params_2_num_samples_500/' drug_names{drug_idx} '_apd90_results.dat']
+    filename = [getenv('CHASTE_TEST_OUTPUT') '/CrumbDataStudy_num_params_2_num_samples_500/' drug_names{drug_idx} '_apd90_results_num_params_2.dat']
     d = importdata(filename,'\t',1);
     
     % If it ran OK there will be a structure d.data
@@ -22,12 +22,12 @@ for drug_idx = 1:length(drug_names)
     figure(1)
     h(drug_idx) = histogram(d.data(:,3),20);
     hold all
-    [max_val, i] = max(h2(drug_idx).Values);
-    x = h2(drug_idx).BinEdges(i);
+    [max_val, i] = max(h(drug_idx).Values);
+    x = h(drug_idx).BinEdges(i);
     y = 1.05*max_val;
     text_obj = text(x,y,drug_names{drug_idx});
     set(text_obj, 'rotation', 45)
-    set(h2(drug_idx),'FaceColor',colour_order(drug_idx,:)) 
+    set(h(drug_idx),'FaceColor',colour_order(drug_idx,:)) 
     
     values = h(drug_idx).Values;
     tmp = h(drug_idx).BinEdges;    

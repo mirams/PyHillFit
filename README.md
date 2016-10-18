@@ -9,3 +9,5 @@ The following packages are pre-requisites for running `dose-response-fitting`:
 ## Running the code
 
 
+
+To run the Uncertainty Propagation example, see the README.md in the chaste folder.

@@ -2,27 +2,39 @@ import os
 import pandas as pd
 import numpy as np
 
-file_name = 'python_input_data.csv'
-df = pd.read_csv(file_name, names=['Drug','Channel','Experiment','Concentration','Inhibition'])
-drugs = df.Drug.unique()
-channels = df.Channel.unique()
+def setup(synthetic=False):
+    global file_name, df, drugs, channels
+    if (not synthetic):
+        file_name = '../data/crumb_data.csv'
+    else:
+        file_name = '../data/synthetic_data.csv'
+    df = pd.read_csv(file_name, names=['Drug','Channel','Experiment','Concentration','Inhibition'])
+    drugs = df.Drug.unique()
+    channels = df.Channel.unique()
+
+def file_len(fname,num_its):
+    with open(fname,'r') as f:
+        for i, l in enumerate(f):
+            if i < num_its:
+                pass
+            else:
+                return i
+    return i # because first line is header
 
 def list_drug_channel_options(args_all):
     if not args_all:
         print "\nDrugs:\n"
         for i in range(len(drugs)):
             print "{}. {}".format(i+1,drugs[i])
-        drug_index = int(raw_input("\nSelect drug number: "))-1
-        assert(0 <= drug_index < len(drugs))
-        drug = drugs[drug_index]
+        drug_indices = [x-1 for x in map(int,raw_input("\nSelect drug numbers: ").split())]
+        assert(0 <= len(drug_indices) <= len(drugs))
+        drugs_to_run = [drugs[drug_index] for drug_index in drug_indices]
         print "\nChannels:\n"
         for i in range(len(channels)):
             print "{}. {}".format(i+1,channels[i])
-        channel_index = int(raw_input("\nSelect channel number: "))-1
-        assert(0 <= channel_index < len(channels))
-        channel = channels[channel_index]
-        drugs_to_run = [drug]
-        channels_to_run = [channel]
+        channel_indices = [x-1 for x in map(int,raw_input("\nSelect channel numbers: ").split())]
+        assert(0 <= len(channel_indices) <= len(channels))
+        channels_to_run = [channels[channel_index] for channel_index in channel_indices]
     else:
         drugs_to_run = drugs
         channels_to_run = channels
@@ -38,12 +50,15 @@ def load_crumb_data(drug,channel):
     return num_expts, experiment_numbers, experiments
     
     
-def hierarchical_output_dirs_and_chain_file(drug,channel):
+def hierarchical_output_dirs_and_chain_file(drug,channel,synthetic=False,Ne=0):
     if ('/' in drug):
         drug = drug.replace('/','_')
     if ('/' in channel):
         channel = channel.replace('/','_')
-    output_dir = 'output/hierarchical/drugs/{}/{}/'.format(drug,channel)
+    if (not synthetic):
+        output_dir = 'output/hierarchical/real/drugs/{}/{}/{}_expts/'.format(drug,channel,Ne)
+    else:
+        output_dir = 'output/hierarchical/synthetic/drugs/{}/{}/{}_expts/'.format(drug,channel,Ne)
     chain_dir = output_dir+'chain/'
     figs_dir = output_dir+'figures/'
     for directory in [output_dir,chain_dir,figs_dir]:
@@ -58,19 +73,66 @@ def dose_response_model(dose,hill,IC50):
 def pic50_to_ic50(pic50): # IC50 in uM
     return 10**(6-pic50)
     
-def hierarchical_posterior_predictive_cdf_files(drug,channel):
-    cdf_dir = 'output/hierarchical/drugs/{}/{}/cdfs/'.format(drug,channel)
+def ic50_to_pic50(ic50): # IC50 in uM
+    return 6-np.log10(ic50)
+    
+def hierarchical_posterior_predictive_cdf_files(drug,channel,synthetic,Ne):
+    if (not synthetic):
+        cdf_dir = 'output/hierarchical/real/drugs/{}/{}/{}_expts/cdfs/'.format(drug,channel,Ne)
+    else:
+        cdf_dir = 'output/hierarchical/synthetic/drugs/{}/{}/{}_expts/cdfs/'.format(drug,channel,Ne)
     if not os.path.exists(cdf_dir):
         os.makedirs(cdf_dir)
     hill_cdf_file = cdf_dir+'{}_{}_posterior_predictive_hill_cdf.txt'.format(drug,channel)
     pic50_cdf_file = cdf_dir+'{}_{}_posterior_predictive_pic50_cdf.txt'.format(drug,channel)
     return hill_cdf_file, pic50_cdf_file
     
-def hierarchical_hill_and_pic50_samples_for_AP_file(drug,channel):
-    output_dir = 'output/hierarchical/hill_pic50_samples/'
+def hierarchical_hill_and_pic50_samples_for_AP_file(drug,channel,synthetic):
+    if (not synthetic):
+        output_dir = 'output/hierarchical/real/posterior_predictive_hill_pic50_samples/'
+    else:
+        output_dir = 'output/hierarchical/synthetic/posterior_predictive_hill_pic50_samples/'
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     output_file = output_dir + '{}_{}_hill_pic50_samples.txt'.format(drug,channel)
-    with open(output_file,'w') as outfile:
-        outfile.write('# Hill, pIC50\n')
     return output_file
+    
+def hierarchical_downsampling_folder_and_file(drug,channel):
+    output_dir = 'output/hierarchical/downsampling/'
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    output_file = output_dir + '{}_{}_downsampled_alpha_beta_mu_s.txt'.format(drug,channel)
+    return output_file
+
+def nonhierarchical_chain_file_and_figs_dir(drug,channel,synthetic):
+    if ('/' in drug):
+        drug = drug.replace('/','_')
+    if ('/' in channel):
+        channel = channel.replace('/','_')
+    if (not synthetic):
+        output_dir = 'output/nonhierarchical/real/drugs/{}/{}/'.format(drug,channel)
+    else:
+        output_dir = 'output/nonhierarchical/synthetic/drugs/{}/{}/'.format(drug,channel)
+    chain_dir = output_dir+'chain/'
+    images_dir = output_dir+'images/'
+    dirs = [output_dir,chain_dir,images_dir]
+    for directory in dirs:
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+    chain_file = chain_dir+'{}_{}_nonhierarchical_chain.txt'.format(drug,channel)
+    return drug,channel,chain_file,images_dir
+    
+def alpha_mu_downsampling(drug,channel,synthetic):
+    if (not synthetic):
+        output_dir = '../chaste/samples/'
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    output_file = output_dir + '{}_{}_hill_pic50_samples.txt'.format(drug,channel)
+    return output_file
+    
+def all_predictions_dir(drug,channel):
+    main_dir = 'output/all_prediction_curves/{}/{}/'.format(drug,channel)
+    if not os.path.exists(main_dir):
+        os.makedirs(main_dir)
+    return main_dir
+

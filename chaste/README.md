@@ -49,7 +49,9 @@ and run the simulations from the Chaste folder, with:
 ```
 scons cl=1 b=GccOptNative projects/ApPredict/test/TestCrumbPredictions.hpp
 ```
+## Visualizing the results
 
+The results can be visualized into the histogram using the matlab script `process_results.m`.
 
 
 

@@ -16,9 +16,7 @@ We have made a .csv file of the [Crumb et al.](http://dx.doi.org/10.1016/j.vascn
 
 ## Running the dose-response fitting code
 
-### Single-level fitting
-
-### Hierarchical fitting
+To run the python-based dose-response fitting code, see the [README](python/README.md) in the `python` folder.
 
 ## Uncertainty Propagation
 

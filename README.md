@@ -10,7 +10,7 @@ The following python packages are pre-requisites for running `dose-response-fitt
  * [scipy](https://www.scipy.org/)
  * [pandas](http://pandas.pydata.org/)
  
-On most linux distributions you can install these via pip, which itself can be installed, if it isn't already present, following the instructions [on the pip homepage](https://pip.pypa.io/en/latest/installing/).
+On most linux distributions you can install these via `pip`, which itself can be installed, if it isn't already present, following the instructions [on the pip homepage](https://pip.pypa.io/en/latest/installing/).
 
 Then all the above dependencies can be installed in one go with:
 ```

@@ -4,11 +4,11 @@ Code to load and fit dose response curves in a Bayesian inference framework
 ## Pre-requisites
 
 The following packages are pre-requisites for running `dose-response-fitting`:
- * numpy
- * cma
- * matplotlib
- * scipy
- * pandas
+ * [numpy](http://www.numpy.org/)
+ * [cma](https://www.lri.fr/~hansen/cmaes_inmatlab.html#python)
+ * [matplotlib](http://matplotlib.org/)
+ * [scipy](https://www.scipy.org/)
+ * [pandas](http://pandas.pydata.org/)
 
 ## Crumb dataset
 

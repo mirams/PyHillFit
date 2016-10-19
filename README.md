@@ -3,7 +3,7 @@ Code to load dose-response data and fit dose response curves in a Bayesian infer
 
 ## Pre-requisites
 
-The following packages are pre-requisites for running `dose-response-fitting`:
+The following python packages are pre-requisites for running `dose-response-fitting`:
  * [numpy](http://www.numpy.org/)
  * [cma](https://www.lri.fr/~hansen/cmaes_inmatlab.html#python)
  * [matplotlib](http://matplotlib.org/)

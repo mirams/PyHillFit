@@ -9,6 +9,15 @@ The following packages are pre-requisites for running `dose-response-fitting`:
  * [matplotlib](http://matplotlib.org/)
  * [scipy](https://www.scipy.org/)
  * [pandas](http://pandas.pydata.org/)
+ 
+On most linux distributions you can install these via [pip](), which itself can be installed, if it isn't already using a command like this (for debian/ubuntu):
+```
+sudo apt-get install python-pip
+```
+Then all the above dependencies can be installed in one go with:
+```
+sudo pip install numpy cma matplotlib scipy pandas
+```
 
 ## Crumb dataset
 

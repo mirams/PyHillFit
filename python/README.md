@@ -43,3 +43,8 @@ python plot_hierarchical_superimposed.py
 and again select from the menu.
 
 Everything will be saved in `python/output/...` plus a very verbose and hopefully-easy-to-follow chain of subdirectories.
+
+# Input data files --data-file
+
+Input data should be a csv file in the same format as data/crumb_data.csv, with one header line: "Compound,Channel,Experiment,Dose,Response".
+Each data file can have as many compounds and channels as required.

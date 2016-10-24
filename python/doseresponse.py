@@ -6,7 +6,7 @@ def setup(given_file):
     global file_name, dir_name, df, drugs, channels
     file_name = given_file
     dir_name = given_file.split('/')[-1][:-4]
-    df = pd.read_csv(file_name, names=['Drug','Channel','Experiment','Concentration','Inhibition'])
+    df = pd.read_csv(file_name, names=['Drug','Channel','Experiment','Concentration','Inhibition'],skiprows=1)
     drugs = df.Drug.unique()
     channels = df.Channel.unique()
 

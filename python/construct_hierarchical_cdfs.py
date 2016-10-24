@@ -21,10 +21,11 @@ parser.add_argument("-np", "--no-plots", action='store_true', help="don't make a
 parser.add_argument("-tu", "--top-up", action='store_true', help="to use with --all, run on all drugs who don't already have MCMC files", default=False)
 parser.add_argument("-sy", "--synthetic", action='store_true', help="use synthetic data (only one drug/channel combination exists currently", default=False)
 parser.add_argument("-Ne", "--num_expts", type=int, help="how many experiments to fit to", default=0)
+parser.add_argument("--data-file", type=str, help="csv file from which to read in data, in same format as provided crumb_data.csv")
 
 args = parser.parse_args()
 
-dr.setup(args.synthetic)
+dr.setup(args.data_file)
 
 drugs_to_run, channels_to_run = dr.list_drug_channel_options(args.all)
 

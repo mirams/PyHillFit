@@ -14,9 +14,10 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-a", "--all", action='store_true', help='plot histograms from hierarchical MCMC on all drugs and channels', default=False)
 parser.add_argument("-sy", "--synthetic", action='store_true', help="use synthetic data (only one drug/channel combination exists currently", default=False)
 parser.add_argument("-Ne", "--num_expts", type=int, help="how many synthetic experiments to fit to")
+parser.add_argument("--data-file", type=str, help="csv file from which to read in data, in same format as provided crumb_data.csv")
 args = parser.parse_args()
 
-dr.setup(args.synthetic)
+dr.setup(args.data_file)
 
 drugs_to_run, channels_to_run = dr.list_drug_channel_options(args.all)
 

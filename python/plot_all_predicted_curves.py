@@ -22,9 +22,10 @@ parser.add_argument("-a", "--all", action='store_true', help='plot histograms fr
 parser.add_argument("-nc", "--num-cores", type=int, help="number of cores to parallelise drug/channel combinations",default=1)
 parser.add_argument("-sy", "--synthetic", action='store_true', help="use synthetic data (only one drug/channel combination exists currently", default=False)
 parser.add_argument("-Ne", "--num_expts", type=int, help="how many synthetic experiments to fit to",default=0)
+parser.add_argument("--data-file", type=str, help="csv file from which to read in data, in same format as provided crumb_data.csv")
 args = parser.parse_args()
 
-dr.setup(args.synthetic)
+dr.setup(args.data_file)
 
 drugs_to_run, channels_to_run = dr.list_drug_channel_options(args.all)
 
@@ -198,15 +199,17 @@ def run(drug_channel):
     ax2.legend(loc=2,fontsize=10)
     
     
-    print "figs saved in", figs_dir
     
     plot_dir = dr.all_predictions_dir(drug,channel)
     
     fig.tight_layout()
     fig.savefig(plot_dir+'{}_{}_all_predictions.png'.format(drug,channel))
     fig.savefig(plot_dir+'{}_{}_all_predictions.pdf'.format(drug,channel))
+    
 
     plt.close()
+    
+    print "Figures saved in", plot_dir
     
 
 drugs_channels = it.product(drugs_to_run,channels_to_run)

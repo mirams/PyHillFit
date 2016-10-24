@@ -26,10 +26,14 @@ parser.add_argument("-c", "--num-cores", type=int, help="number of cores to para
 parser.add_argument("-sy", "--synthetic", action='store_true', help="use synthetic data (only one drug/channel combination exists currently", default=False)
 parser.add_argument("-Ne", "--num_expts", type=int, help="how many experiments to fit to", default=0)
 parser.add_argument("--num-APs", type=int, help="how many (alpha,mu) samples to take for AP simulations", default=500)
+parser.add_argument("--data-file", type=str, help="csv file from which to read in data, in same format as provided crumb_data.csv")
 args = parser.parse_args()
 
+if not args.data_file:
+    sys.exit('\nPlease provide path to input data file using --data-file. Exiting now.\n')
+
 # load either real or synthetic data depending on command line argument, default is real data
-dr.setup(args.synthetic)
+dr.setup(args.data_file)
 
 # list drug and channel options, select from command line
 # can select more than one of either

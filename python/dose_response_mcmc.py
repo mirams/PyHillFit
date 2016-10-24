@@ -30,10 +30,11 @@ parser.add_argument('-a', '--all', action='store_true', help='run all drugs and 
 parser.add_argument('-s', '--num-samples', type=int, help='number of MCMC samples to save for AP simulations', default=500)
 parser.add_argument("--num-cores", type=int, help="number of cores to parallelise drug/channel combinations",default=1)
 parser.add_argument("-sy", "--synthetic", action='store_true', help="use synthetic data (only one drug/channel combination exists currently", default=False)
+parser.add_argument("--data-file", type=str, help="csv file from which to read in data, in same format as provided crumb_data.csv")
 
 args = parser.parse_args()
 
-dr.setup(args.synthetic)
+dr.setup(args.data_file)
 drugs_to_run, channels_to_run = dr.list_drug_channel_options(args.all)
 
 def log_likelihood(measurements,doses,theta):

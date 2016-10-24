@@ -2,12 +2,10 @@ import os
 import pandas as pd
 import numpy as np
 
-def setup(synthetic=False):
-    global file_name, df, drugs, channels
-    if (not synthetic):
-        file_name = '../data/crumb_data.csv'
-    else:
-        file_name = '../data/synthetic_data.csv'
+def setup(given_file):
+    global file_name, dir_name, df, drugs, channels
+    file_name = given_file
+    dir_name = given_file.split('/')[-1][:-4]
     df = pd.read_csv(file_name, names=['Drug','Channel','Experiment','Concentration','Inhibition'])
     drugs = df.Drug.unique()
     channels = df.Channel.unique()
@@ -55,16 +53,13 @@ def hierarchical_output_dirs_and_chain_file(drug,channel,synthetic=False,Ne=0):
         drug = drug.replace('/','_')
     if ('/' in channel):
         channel = channel.replace('/','_')
-    if (not synthetic):
-        output_dir = 'output/hierarchical/real/drugs/{}/{}/{}_expts/'.format(drug,channel,Ne)
-    else:
-        output_dir = 'output/hierarchical/synthetic/drugs/{}/{}/{}_expts/'.format(drug,channel,Ne)
+    output_dir = 'output/{}/hierarchical/{}/{}/{}_expts/'.format(dir_name,drug,channel,Ne)
     chain_dir = output_dir+'chain/'
     figs_dir = output_dir+'figures/'
     for directory in [output_dir,chain_dir,figs_dir]:
         if not os.path.exists(directory):
             os.makedirs(directory)
-    chain_file = chain_dir+'{}_{}_hierarchical_chain.txt'.format(drug,channel)
+    chain_file = chain_dir+'{}_{}_{}_hierarchical_chain.txt'.format(dir_name,drug,channel)
     return drug, channel, output_dir, chain_dir, figs_dir, chain_file
     
 def dose_response_model(dose,hill,IC50):
@@ -77,28 +72,22 @@ def ic50_to_pic50(ic50): # IC50 in uM
     return 6-np.log10(ic50)
     
 def hierarchical_posterior_predictive_cdf_files(drug,channel,synthetic,Ne):
-    if (not synthetic):
-        cdf_dir = 'output/hierarchical/real/drugs/{}/{}/{}_expts/cdfs/'.format(drug,channel,Ne)
-    else:
-        cdf_dir = 'output/hierarchical/synthetic/drugs/{}/{}/{}_expts/cdfs/'.format(drug,channel,Ne)
+    cdf_dir = 'output/{}/hierarchical/{}/{}/{}_expts/cdfs/'.format(dir_name,drug,channel,Ne)
     if not os.path.exists(cdf_dir):
         os.makedirs(cdf_dir)
-    hill_cdf_file = cdf_dir+'{}_{}_posterior_predictive_hill_cdf.txt'.format(drug,channel)
-    pic50_cdf_file = cdf_dir+'{}_{}_posterior_predictive_pic50_cdf.txt'.format(drug,channel)
+    hill_cdf_file = cdf_dir+'{}_{}_{}_posterior_predictive_hill_cdf.txt'.format(dir_name,drug,channel)
+    pic50_cdf_file = cdf_dir+'{}_{}_{}_posterior_predictive_pic50_cdf.txt'.format(dir_name,drug,channel)
     return hill_cdf_file, pic50_cdf_file
     
 def hierarchical_hill_and_pic50_samples_for_AP_file(drug,channel,synthetic):
-    if (not synthetic):
-        output_dir = 'output/hierarchical/real/posterior_predictive_hill_pic50_samples/'
-    else:
-        output_dir = 'output/hierarchical/synthetic/posterior_predictive_hill_pic50_samples/'
+    output_dir = 'output/{}/hierarchical/synthetic/posterior_predictive_hill_pic50_samples/'.format(dir_name)
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
-    output_file = output_dir + '{}_{}_hill_pic50_samples.txt'.format(drug,channel)
+    output_file = output_dir + '{}_{}_{}_hill_pic50_samples.txt'.format(dir_name,drug,channel)
     return output_file
     
 def hierarchical_downsampling_folder_and_file(drug,channel):
-    output_dir = 'output/hierarchical/downsampling/'
+    output_dir = 'output/{}/hierarchical/downsampling/'.format(dir_name)
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     output_file = output_dir + '{}_{}_downsampled_alpha_beta_mu_s.txt'.format(drug,channel)
@@ -109,17 +98,14 @@ def nonhierarchical_chain_file_and_figs_dir(drug,channel,synthetic):
         drug = drug.replace('/','_')
     if ('/' in channel):
         channel = channel.replace('/','_')
-    if (not synthetic):
-        output_dir = 'output/nonhierarchical/real/drugs/{}/{}/'.format(drug,channel)
-    else:
-        output_dir = 'output/nonhierarchical/synthetic/drugs/{}/{}/'.format(drug,channel)
+    output_dir = 'output/{}/nonhierarchical/{}/{}/'.format(dir_name,drug,channel)
     chain_dir = output_dir+'chain/'
-    images_dir = output_dir+'images/'
+    images_dir = output_dir+'figures/'
     dirs = [output_dir,chain_dir,images_dir]
     for directory in dirs:
         if not os.path.exists(directory):
             os.makedirs(directory)
-    chain_file = chain_dir+'{}_{}_nonhierarchical_chain.txt'.format(drug,channel)
+    chain_file = chain_dir+'{}_{}_{}_nonhierarchical_chain.txt'.format(dir_name,drug,channel)
     return drug,channel,chain_file,images_dir
     
 def alpha_mu_downsampling(drug,channel,synthetic):
@@ -131,7 +117,7 @@ def alpha_mu_downsampling(drug,channel,synthetic):
     return output_file
     
 def all_predictions_dir(drug,channel):
-    main_dir = 'output/all_prediction_curves/{}/{}/'.format(drug,channel)
+    main_dir = 'output/{}/all_prediction_curves/{}/{}/'.format(dir_name,drug,channel)
     if not os.path.exists(main_dir):
         os.makedirs(main_dir)
     return main_dir

@@ -1,7 +1,7 @@
 # PyHillFit data format
 
 This folder contains data from the paper:
-()[Crumb et al. Journal of Pharmacological & Toxicological Methods (2016): An evaluation of 30 clinical drugs against the CiPA proposed ion channel panel]
+[Crumb et al. Journal of Pharmacological & Toxicological Methods (2016): An evaluation of 30 clinical drugs against the CiPA proposed ion channel panel](https://www.ncbi.nlm.nih.gov/pubmed/27060526)
 
 The tables have comma separated values with this format on each line (plus a header line):
 ['Drug','Channel','Experiment','Concentration(uM)','%Inhibition']

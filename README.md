@@ -27,4 +27,4 @@ To run the python-based dose-response fitting code, see the [README](python/READ
 
 ## Uncertainty Propagation
 
-To run the Uncertainty Propagation example, see the [README](chaste/README.md) in the `chaste` folder.
+To run the Uncertainty Propagation example based on `PyHillFit` output, see the [README](chaste/README.md) in the `chaste` folder.

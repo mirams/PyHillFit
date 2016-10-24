@@ -3,7 +3,7 @@ Code to load dose-response data and fit dose Hill response curves in a Bayesian 
 
 ## Pre-requisites
 
-The following python packages are pre-requisites for running `dose-response-fitting`:
+The following python packages are pre-requisites for running `PyHillFit`:
  * [numpy](http://www.numpy.org/)
  * [cma](https://www.lri.fr/~hansen/cmaes_inmatlab.html#python)
  * [matplotlib](http://matplotlib.org/)

@@ -1,5 +1,5 @@
-# dose-response-fitting
-Code to load dose-response data and fit dose response curves in a Bayesian inference framework.
+# PyHillFit
+Code to load dose-response data and fit dose Hill response curves in a Bayesian inference framework.
 
 ## Pre-requisites
 

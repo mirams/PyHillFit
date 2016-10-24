@@ -1,4 +1,4 @@
-# Running dose-response-fitting
+# Running PyHillFit
 
 You need to be inside the python directory (this directory) for this to work.
 

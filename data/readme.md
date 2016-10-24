@@ -6,6 +6,8 @@ This folder contains data from the paper:
 The tables have comma separated values with this format on each line (plus a header line):
 ['Drug','Channel','Experiment','Concentration(uM)','%Inhibition']
 
+Please note, the dose/concentration should be given in micro-Molar as the fitting algorithm converts to pIC50.
+
 ## Sub-folder
 The sub-folder contains some scripts that were used to generate these .csv files from the raw data in the original publication.
 

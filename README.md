@@ -1,4 +1,4 @@
-# PyHillFit
+# *PyHillFit* - python code to perform Bayesian inference of Hill curve parameters from dose-response data
 Code to load dose-response data and fit dose Hill response curves in a Bayesian inference framework.
 
 ![schematic of PyHillFit inputs and outputs](https://github.com/mirams/PyHillFit/blob/master/schematic.png)

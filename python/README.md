@@ -8,10 +8,7 @@ The MCMC script is
 ```
 PyHillFit.py
 ```
-which is called from the command line. For a list of additional command line arguments, run
-```
-python PyHillFit.py -h
-```
+which is called from the command line. If it runs without any arguments it will display a list of required and optional command line arguments.
 
 You HAVE to specify an input data csv file, in the same format as the provided crumb_data.csv.
 The default is to run the single-level MCMC algorithm.
@@ -44,7 +41,7 @@ and again select from the menu.
 
 Everything will be saved in `python/output/...` plus a very verbose and hopefully-easy-to-follow chain of subdirectories.
 
-# Input data files --data-file
+## Input data files --data-file
 
 Input data should be a csv file in the same format as data/crumb_data.csv, with one header line: "Compound,Channel,Experiment,Dose,Response".
 Each data file can have as many compounds and channels as required.

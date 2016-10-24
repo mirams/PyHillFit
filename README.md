@@ -21,7 +21,7 @@ sudo pip install numpy cma matplotlib scipy pandas
 
 We have made a .csv file of the [Crumb et al.](http://dx.doi.org/10.1016/j.vascn.2016.03.009) dataset, which is available in the `data` folder, together with some example python scripts for reading it.
 
-## Running the dose-response fitting code
+## Running PyHillFit
 
 To run the python-based dose-response fitting code, see the [README](python/README.md) in the `python` folder.
 

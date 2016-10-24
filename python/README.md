@@ -2,23 +2,29 @@
 
 You need to be inside the python directory (this directory) for this to work.
 
-## Single-level MCMC
+## Single-level and hierarchical MCMC
 
-To run non-hierarchical MCMC, from command line:
+The MCMC script is
 ```
-python dose_response_mcmc.py -h
+PyHillFit.py
 ```
-will actually give you the list of optional arguments.  You can just run:
+which is called from the command line. For a list of additional command line arguments, run
 ```
-python dose_response_mcmc.py
+python PyHillFit.py -h
 ```
-and you will be asked to choose drugs and channels from the input data file. You'll be presented with a list, and you can choose multiple options.
 
-## Hierarchical MCMC
-Similarly, for hierarchical MCMC:
+You HAVE to specify an input data csv file, in the same format as the provided crumb_data.csv.
+The default is to run the single-level MCMC algorithm.
+To do this with the Crumb data, for example, run
 ```
-python hierarchical_dose_response_mcmc_logistics.py
+python PyHillFit.py --data-file ../data/crumb_data.csv
 ```
+
+Alternatively, include the --hierarchical argument:
+```
+python PyHillFit.py --data-file ../data/crumb_data.csv --hierarchical
+```
+
 After running the hierarchical MCMC, you should run:
 ```
 python construct_hierarchical_cdfs.py
@@ -37,8 +43,3 @@ python plot_hierarchical_superimposed.py
 and again select from the menu.
 
 Everything will be saved in `python/output/...` plus a very verbose and hopefully-easy-to-follow chain of subdirectories.
-
-After running the hierarchical MCMC, (alpha,mu) samples will be automatically saved into `chaste/samples/` for later use in AP predictions.
-
-For synthetic data, or your own new data, you can add your own in `data/synthetic_data.csv`, just keep the same format and you can add your own fictitious drugs on the end, and they'll be presented to you in the list.
-Remember to use the `-sy` flag for synthetic data.

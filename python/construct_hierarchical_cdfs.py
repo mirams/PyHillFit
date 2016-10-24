@@ -145,7 +145,7 @@ def run(drug_channel):
     if save_samples_for_APs:
         samples_file = dr.hierarchical_hill_and_pic50_samples_for_AP_file(drug,channel,args.synthetic)
         with open(samples_file,'w') as outfile:
-            outfile.write('# {} samples of (alpha,mu) from MCMC output, to be used as (Hill,pIC50) in AP predictions\n'.format(args.samples))
+            outfile.write('# {} samples of (Hill,pIC50) drawn from their posterior predictive distributions, as defined by MCMC samples\n'.format(args.samples))
             np.savetxt(outfile,np.vstack((hill_interpolated_inverse_cdf_samples,pic50_interpolated_inverse_cdf_samples)).T)
 
 

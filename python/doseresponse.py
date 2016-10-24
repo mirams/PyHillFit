@@ -48,7 +48,7 @@ def load_crumb_data(drug,channel):
     return num_expts, experiment_numbers, experiments
     
     
-def hierarchical_output_dirs_and_chain_file(drug,channel,synthetic=False,Ne=0):
+def hierarchical_output_dirs_and_chain_file(drug,channel,Ne=0):
     if ('/' in drug):
         drug = drug.replace('/','_')
     if ('/' in channel):
@@ -71,7 +71,7 @@ def pic50_to_ic50(pic50): # IC50 in uM
 def ic50_to_pic50(ic50): # IC50 in uM
     return 6-np.log10(ic50)
     
-def hierarchical_posterior_predictive_cdf_files(drug,channel,synthetic,Ne):
+def hierarchical_posterior_predictive_cdf_files(drug,channel,Ne):
     cdf_dir = 'output/{}/hierarchical/{}/{}/{}_expts/cdfs/'.format(dir_name,drug,channel,Ne)
     if not os.path.exists(cdf_dir):
         os.makedirs(cdf_dir)
@@ -79,11 +79,11 @@ def hierarchical_posterior_predictive_cdf_files(drug,channel,synthetic,Ne):
     pic50_cdf_file = cdf_dir+'{}_{}_{}_posterior_predictive_pic50_cdf.txt'.format(dir_name,drug,channel)
     return hill_cdf_file, pic50_cdf_file
     
-def hierarchical_hill_and_pic50_samples_for_AP_file(drug,channel,synthetic):
-    output_dir = 'output/{}/hierarchical/synthetic/posterior_predictive_hill_pic50_samples/'.format(dir_name)
+def hierarchical_hill_and_pic50_samples_for_AP_file(drug,channel):
+    output_dir = 'output/{}/hierarchical/posterior_predictive_hill_pic50_samples/'.format(dir_name)
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
-    output_file = output_dir + '{}_{}_{}_hill_pic50_samples.txt'.format(dir_name,drug,channel)
+    output_file = output_dir + '{}_{}_hill_pic50_samples.txt'.format(dir_name,drug,channel)
     return output_file
     
 def hierarchical_downsampling_folder_and_file(drug,channel):
@@ -93,7 +93,7 @@ def hierarchical_downsampling_folder_and_file(drug,channel):
     output_file = output_dir + '{}_{}_downsampled_alpha_beta_mu_s.txt'.format(drug,channel)
     return output_file
 
-def nonhierarchical_chain_file_and_figs_dir(drug,channel,synthetic):
+def nonhierarchical_chain_file_and_figs_dir(drug,channel):
     if ('/' in drug):
         drug = drug.replace('/','_')
     if ('/' in channel):
@@ -108,9 +108,8 @@ def nonhierarchical_chain_file_and_figs_dir(drug,channel,synthetic):
     chain_file = chain_dir+'{}_{}_{}_nonhierarchical_chain.txt'.format(dir_name,drug,channel)
     return drug,channel,chain_file,images_dir
     
-def alpha_mu_downsampling(drug,channel,synthetic):
-    if (not synthetic):
-        output_dir = '../chaste/samples/'
+def alpha_mu_downsampling(drug,channel):
+    output_dir = 'output/{}/hierarchical/alpha_mu_samples/'.format(dir_name)
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     output_file = output_dir + '{}_{}_hill_pic50_samples.txt'.format(drug,channel)

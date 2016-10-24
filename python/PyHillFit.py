@@ -23,6 +23,7 @@ import matplotlib.cm as cm
 import sys
 
 parser = argparse.ArgumentParser()
+
 parser.add_argument("-i", "--iterations", type=int, help="number of MCMC iterations",default=500000)
 parser.add_argument("-t", "--thinning", type=int, help="how often to thin the MCMC, i.e. save every t-th iteration",default=5)
 parser.add_argument("-b", "--burn-in-fraction", type=int, help="given N saved MCMC iterations, discard the first N/b as burn-in",default=4)
@@ -32,13 +33,19 @@ parser.add_argument("-p", "--predictions", type=int, help="number of prediction 
 parser.add_argument("-c", "--num-cores", type=int, help="number of cores to parallelise drug/channel combinations",default=1)
 parser.add_argument("-Ne", "--num_expts", type=int, help="how many experiments to fit to", default=0)
 parser.add_argument("--num-APs", type=int, help="how many (alpha,mu) samples to take for AP simulations", default=500)
-parser.add_argument("--data-file", type=str, help="csv file from which to read in data, in same format as provided crumb_data.csv")
 parser.add_argument("--single", action='store_true', help="run single-level MCMC algorithm",default=True)
 parser.add_argument("--hierarchical", action='store_true', help="run hierarchical MCMC algorithm",default=False)
+
+requiredNamed = parser.add_argument_group('required arguments')
+requiredNamed.add_argument("--data-file", type=str, help="csv file from which to read in data, in same format as provided crumb_data.csv", required=True)
+
+if len(sys.argv)==1:
+    parser.print_help()
+    sys.exit(1)
+
 args = parser.parse_args()
 
-if not args.data_file:
-    sys.exit('\nPlease provide path to input data file using --data-file. Exiting now.\n')
+
 
 # load either real or synthetic data depending on command line argument, default is real data
 dr.setup(args.data_file)

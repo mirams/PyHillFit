@@ -43,5 +43,5 @@ Everything will be saved in `python/output/...` plus a very verbose and hopefull
 
 ## Input data files --data-file
 
-Input data should be a csv file in the same format as data/crumb_data.csv, with one header line: "Compound,Channel,Experiment,Dose,Response".
-Each data file can have as many compounds and channels as required.
+Input data should be a csv file in the same format as data/crumb_data.csv, with one header line: "Compound,Channel,Experiment,Dose(uM),Response(%inhibition)".
+Each data file can have as many compounds and channels as required. Note that doses should be given in microMolar, as the conversion to pIC50 is hard-coded to these units.

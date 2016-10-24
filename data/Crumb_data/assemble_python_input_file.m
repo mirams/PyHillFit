@@ -3,6 +3,7 @@ clear all
 
 [Textdata, data, concs] = read_spreadsheet_csv('Spreadsheet_of_data.csv');
 fileID = fopen('../crumb_data.csv','w');
+fprintf(fileID,'Compound,Channel,Experiment,Dose,Response\n');
 
 % Find all the drug names
 NumDrugs = 30;

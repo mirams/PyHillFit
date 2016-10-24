@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 # In[ ]:
 
 file_name = '../crumb_data.csv'
-df = pd.read_csv(file_name, names=['Drug','Channel','Experiment','Concentration','Inhibition'])
+df = pd.read_csv(file_name, names=['Drug','Channel','Experiment','Concentration','Inhibition'],skiprows=1)
 df
 
 

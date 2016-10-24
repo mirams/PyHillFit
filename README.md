@@ -21,7 +21,7 @@ sudo pip install numpy cma matplotlib scipy pandas
 
 ## Crumb dataset
 
-We have made a .csv file of the [Crumb et al.](http://dx.doi.org/10.1016/j.vascn.2016.03.009) dataset, which is available in the `data` folder, together with some example python scripts for reading it.
+We have made a .csv file of the [Crumb et al.](http://dx.doi.org/10.1016/j.vascn.2016.03.009) dataset, which is available in the `data` folder, together with some example python scripts for reading it. You can fit your own data by putting them into a similar format to this `.csv` file. Note that doses/concentrations should be given in microMolar.
 
 ## Running PyHillFit
 

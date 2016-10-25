@@ -12,8 +12,7 @@ import sys
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-a", "--all", action='store_true', help='plot histograms from hierarchical MCMC on all drugs and channels', default=False)
-parser.add_argument("-sy", "--synthetic", action='store_true', help="use synthetic data (only one drug/channel combination exists currently", default=False)
-parser.add_argument("-Ne", "--num_expts", type=int, help="how many synthetic experiments to fit to")
+parser.add_argument("-Ne", "--num_expts", type=int, help="how many experiments to fit to, otherwise will fit to all experiments in data file",default=0)
 parser.add_argument("--data-file", type=str, help="csv file from which to read in data, in same format as provided crumb_data.csv")
 args = parser.parse_args()
 
@@ -29,7 +28,7 @@ def run(drug,channel):
         num_expts = args.num_expts
         experiment_numbers = [x for x in experiment_numbers[:num_expts]]
         experiments = [x for x in experiments[:num_expts]]
-    drug, channel, output_dir, chain_dir, figs_dir, chain_file = dr.hierarchical_output_dirs_and_chain_file(drug,channel,args.synthetic,num_expts)
+    drug, channel, output_dir, chain_dir, figs_dir, chain_file = dr.hierarchical_output_dirs_and_chain_file(drug,channel,num_expts)
     chain = np.loadtxt(chain_file)
     end, num_params = chain.shape
     burn = end/4
@@ -83,7 +82,6 @@ def run(drug,channel):
     alpha = 1./(num_expts-1)
     for i, col in enumerate(mid_param_indices):
         color = matplotlib.colors.ColorConverter().to_rgba(colors[i/2],alpha=alpha)
-        print color
         if i%2==0:
             label = r'$Hill_{}$'.format(i/2+1)
             file_label = 'Hill_{}'.format(i/2+1)
@@ -97,6 +95,8 @@ def run(drug,channel):
     all_fig.savefig(figs_dir+'{}_{}_hierarchical_curves_and_hists.png'.format(drug,channel))
     #all_fig.savefig(figs_dir+'{}_{}_hierarchical_curves_and_hists.pdf'.format(drug,channel))
     plt.show(block=True)
+    
+    print "Figures saved in", figs_dir
     
     print "\n\n{} + {} done\n\n".format(drug,channel)
         

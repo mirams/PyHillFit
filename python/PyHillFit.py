@@ -47,7 +47,7 @@ args = parser.parse_args()
 
 
 
-# load either real or synthetic data depending on command line argument, default is real data
+# load data from specified data file
 dr.setup(args.data_file)
 
 # list drug and channel options, select from command line

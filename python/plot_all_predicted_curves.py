@@ -20,8 +20,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-c", "--concs", nargs="+", type=float, help="drug concentrations at which to find predicted responses",default=[])
 parser.add_argument("-a", "--all", action='store_true', help='plot histograms from hierarchical MCMC on all drugs and channels', default=False)
 parser.add_argument("-nc", "--num-cores", type=int, help="number of cores to parallelise drug/channel combinations",default=1)
-parser.add_argument("-sy", "--synthetic", action='store_true', help="use synthetic data (only one drug/channel combination exists currently", default=False)
-parser.add_argument("-Ne", "--num_expts", type=int, help="how many synthetic experiments to fit to",default=0)
+parser.add_argument("-Ne", "--num_expts", type=int, help="how many experiments to fit to, otherwise will fit to all in the data file",default=0)
 parser.add_argument("--data-file", type=str, help="csv file from which to read in data, in same format as provided crumb_data.csv")
 args = parser.parse_args()
 
@@ -40,9 +39,9 @@ def run(drug_channel):
     if (0 < args.num_expts < num_expts):
         num_expts = args.num_expts
         
-    drug, channel, output_dir, chain_dir, figs_dir, chain_file = dr.hierarchical_output_dirs_and_chain_file(drug,channel,args.synthetic,num_expts)
+    drug, channel, output_dir, chain_dir, figs_dir, chain_file = dr.hierarchical_output_dirs_and_chain_file(drug,channel,num_expts)
     
-    hill_cdf_file, pic50_cdf_file = dr.hierarchical_posterior_predictive_cdf_files(drug,channel,args.synthetic,num_expts)
+    hill_cdf_file, pic50_cdf_file = dr.hierarchical_posterior_predictive_cdf_files(drug,channel,num_expts)
     
     hill_cdf = np.loadtxt(hill_cdf_file)
     pic50_cdf = np.loadtxt(pic50_cdf_file)
@@ -149,7 +148,7 @@ def run(drug_channel):
     # now plot non-hierarchical
     
     num_params = 3
-    drug,channel,chain_file,figs_dir = dr.nonhierarchical_chain_file_and_figs_dir(drug,channel,args.synthetic)
+    drug,channel,chain_file,figs_dir = dr.nonhierarchical_chain_file_and_figs_dir(drug,channel)
     chain = np.loadtxt(chain_file,usecols=range(num_params-1)) # not interested in log-target values right now
     end = chain.shape[0]
     burn = end/4
@@ -204,7 +203,7 @@ def run(drug_channel):
     
     fig.tight_layout()
     fig.savefig(plot_dir+'{}_{}_all_predictions.png'.format(drug,channel))
-    fig.savefig(plot_dir+'{}_{}_all_predictions.pdf'.format(drug,channel))
+    #fig.savefig(plot_dir+'{}_{}_all_predictions.pdf'.format(drug,channel)) # uncomment to save as pdf, or change extension to whatever you want
     
 
     plt.close()

@@ -68,11 +68,11 @@ def run(drug_channel):
         num_expts = args.num_expts
         save_samples_for_APs = False
     else:
-        print "Doing all experiments\n"
+        print "Fitting to all experiments\n"
         save_samples_for_APs = True
     
     
-    drug, channel, output_dir, chain_dir, figs_dir, chain_file = dr.hierarchical_output_dirs_and_chain_file(drug,channel,args.synthetic,num_expts)
+    drug, channel, output_dir, chain_dir, figs_dir, chain_file = dr.hierarchical_output_dirs_and_chain_file(drug,channel,num_expts)
     
 
     try:
@@ -127,7 +127,7 @@ def run(drug_channel):
             fig.savefig(figs_dir+"{}_{}_{}_posterior_predictive.png".format(drug,channel,file_labels[i]))
             plt.close()
 
-    hill_cdf_file, pic50_cdf_file = dr.hierarchical_posterior_predictive_cdf_files(drug,channel,args.synthetic,num_expts)
+    hill_cdf_file, pic50_cdf_file = dr.hierarchical_posterior_predictive_cdf_files(drug,channel,num_expts)
 
     np.savetxt(hill_cdf_file,np.vstack((hill_x_range, hill_cdf_sum)).T)
     np.savetxt(pic50_cdf_file,np.vstack((pic50_x_range, pic50_cdf_sum)).T)
@@ -143,7 +143,7 @@ def run(drug_channel):
     # we currently have it set to 500
     # in theory, the more samples, the better the AP histograms will look!
     if save_samples_for_APs:
-        samples_file = dr.hierarchical_hill_and_pic50_samples_for_AP_file(drug,channel,args.synthetic)
+        samples_file = dr.hierarchical_hill_and_pic50_samples_for_AP_file(drug,channel)
         with open(samples_file,'w') as outfile:
             outfile.write('# {} samples of (Hill,pIC50) drawn from their posterior predictive distributions, as defined by MCMC samples\n'.format(args.samples))
             np.savetxt(outfile,np.vstack((hill_interpolated_inverse_cdf_samples,pic50_interpolated_inverse_cdf_samples)).T)

@@ -586,7 +586,7 @@ def run_single_level(drug_channel):
     # uniform prior intervals
     hill_prior = [0, 10]
     pic50_prior = [-1, 20]
-    sigma_prior = [0, 50]
+    sigma_prior = [1e-3, 50]
 
     prior_lowers = np.array([hill_prior[0], pic50_prior[0],sigma_prior[0]])
     prior_uppers = np.array([hill_prior[1], pic50_prior[1],sigma_prior[1]])
@@ -621,9 +621,10 @@ def run_single_level(drug_channel):
         
     cmaes_ll = log_likelihood_single(responses,concs,theta_cur)
         
-    best_fit_fig = plt.figure()
+    best_fit_fig = plt.figure(figsize=(5,4))
     best_fit_ax = best_fit_fig.add_subplot(111)
     best_fit_ax.set_xscale('log')
+    best_fit_ax.grid()
     plot_lower_lim = int(np.log10(np.min(concs)))-1
     plot_upper_lim = int(np.log10(np.max(concs)))+2
     best_fit_ax.set_xlim(10**plot_lower_lim,10**plot_upper_lim)
@@ -631,17 +632,18 @@ def run_single_level(drug_channel):
     num_pts = 1001
     x_range = np.logspace(plot_lower_lim,plot_upper_lim,num_pts)
     best_fit_curve = dr.dose_response_model(x_range,hill_cur,dr.pic50_to_ic50(pic50_cur))
-    best_fit_ax.plot(x_range,best_fit_curve,label='Best fit')
+    best_fit_ax.plot(x_range,best_fit_curve,label='Best fit',lw=2)
     best_fit_ax.set_ylabel('% {} block'.format(channel))
-    best_fit_ax.set_xlabel('{} concentration (uM)'.format(drug))
-    best_fit_ax.set_title('Hill = {}, pIC50 = {}, log-likelihood = {}'.format(np.round(hill_cur,2),np.round(pic50_cur,2),np.round(cmaes_ll,2)))
+    best_fit_ax.set_xlabel(r'{} concentration ($\mu$M)'.format(drug))
+    best_fit_ax.set_title('Hill = {}, pIC50 = {}'.format(np.round(hill_cur,2),np.round(pic50_cur,2)))
     best_fit_ax.scatter(concs,responses,marker="o",color='orange',s=100,label='Data',zorder=10)
     best_fit_ax.legend(loc=2)
     best_fit_fig.tight_layout()
     best_fit_fig.savefig(images_dir+'{}_{}_CMA-ES_best_fit.png'.format(drug,channel))
+    best_fit_fig.savefig(images_dir+'{}_{}_CMA-ES_best_fit.png'.format(drug,channel))
     plt.close()
 
-    # sys.exit() # uncomment if you only want to plot the best fit
+    #sys.exit() # uncomment if you only want to plot the best fit
 
     # let MCMC look around for a bit before adaptive covariance matrix
     # same rule (100*dimension) as in hierarchical case

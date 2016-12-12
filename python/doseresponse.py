@@ -83,7 +83,7 @@ def hierarchical_hill_and_pic50_samples_for_AP_file(drug,channel):
     output_dir = 'output/{}/hierarchical/posterior_predictive_hill_pic50_samples/'.format(dir_name)
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
-    output_file = output_dir + '{}_{}_hill_pic50_samples.txt'.format(dir_name,drug,channel)
+    output_file = output_dir + '{}_{}_{}_hill_pic50_samples.txt'.format(dir_name,drug,channel)
     return output_file
     
 def hierarchical_downsampling_folder_and_file(drug,channel):

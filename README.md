@@ -13,12 +13,13 @@ The following python packages are pre-requisites for running `PyHillFit`:
  * [matplotlib](http://matplotlib.org/)
  * [scipy](https://www.scipy.org/)
  * [pandas](http://pandas.pydata.org/)
+ * [seaborn](http://seaborn.pydata.org/)
  
 On most linux distributions you can install these via `pip`, which itself can be installed, if it isn't already present, following the instructions [on the pip homepage](https://pip.pypa.io/en/latest/installing/).
 
 Then all the above dependencies can be installed in one go with:
 ```
-sudo pip install numpy cma matplotlib scipy pandas
+sudo pip install numpy cma matplotlib scipy pandas seaborn
 ```
 
 ## Crumb dataset

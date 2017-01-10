@@ -6,6 +6,7 @@ import time
 import os
 import argparse
 import scipy.stats as st
+import matplotlib.patches as mpatches
 
 try:
     import cma
@@ -346,6 +347,9 @@ def run_hierarchical(drug_channel):
     mins = [0,0,-5,0,0]
     maxs = [8,22,20,2,25]
     
+    prior_xs = []
+    priors = []
+    
     total_axes = (6,4)
     fig = plt.figure(figsize=(6,7))
     for i in range(len(labels)-1):
@@ -360,6 +364,8 @@ def run_hierarchical(drug_channel):
         ax = plt.subplot2grid(total_axes, axloc,colspan=2,rowspan=2)
         x_prior = np.linspace(mins[i],maxs[i],501)
         prior = st.gamma.pdf(x_prior,a=shapes[i],scale=scales[i],loc=locs[i])
+        prior_xs.append(x_prior)
+        priors.append(prior)
         ax.plot(x_prior,prior,label='Gamma prior',lw=2)
         ax.set_xlabel(labels[i])
         ax.set_ylabel('Probability density')
@@ -375,7 +381,11 @@ def run_hierarchical(drug_channel):
     i = len(labels)-1
     ax = plt.subplot2grid(total_axes, (4,1),colspan=2,rowspan=2)
     x_prior = np.linspace(mins[i],maxs[i],501)
-    ax.plot(x_prior,st.gamma.pdf(x_prior,a=shapes[i],scale=scales[i],loc=locs[i]),label='Gamma prior',lw=2)
+    prior = st.gamma.pdf(x_prior,a=shapes[i],scale=scales[i],loc=locs[i])
+    ax.plot(x_prior,prior,label='Gamma prior',lw=2)
+    prior_xs.append(x_prior)
+    priors.append(prior)
+    
     ax.set_xlabel(labels[i])
     ax.set_ylabel('Probability density')
     ax.set_xlim(mins[i],maxs[i])
@@ -558,6 +568,47 @@ def run_hierarchical(drug_channel):
         fig.savefig(marginals_dir+'{}_{}_{}_marginal.png'.format(drug,channel,filename))
         #fig.savefig(marginals_dir+'{}_{}_{}_marginal.pdf'.format(drug,channel,filename))
         plt.close()
+        
+    total_axes = (6,4)
+    fig = plt.figure(figsize=(6,7))
+    for i in range(5): # have to do sigma separately
+        if i==0:
+            axloc = (0,0)
+        elif i==1:
+            axloc = (0,2)
+        elif i==2:
+            axloc = (2,0)
+        elif i==3:
+            axloc = (2,2)
+        elif i==4:
+            axloc = (4,0)
+        ax = plt.subplot2grid(total_axes, axloc,colspan=2,rowspan=2)
+        
+        ax.set_xlabel(labels[i])
+        ax.set_ylabel('Probability density')
+        
+        ax.grid()
+        if (i<4):
+            min_sample = np.min(chain[burn:,i])
+            max_sample = np.max(chain[burn:,i])
+            ax.hist(chain[burn:,i],bins=50,normed=True,color='blue',edgecolor='blue')
+        elif (i==4):
+            min_sample = np.min(chain[burn:,-2])
+            max_sample = np.max(chain[burn:,-2])
+            ax.hist(chain[burn:,-2],bins=50,normed=True,color='blue',edgecolor='blue')  # -1 would be log-target
+        ax.set_xlim(min_sample,max_sample)
+        pts_in_this_range = np.where((prior_xs[i] >= min_sample) & (prior_xs[i] <= max_sample))
+        x_in_this_range = prior_xs[i][pts_in_this_range]
+        prior_in_this_range = priors[i][pts_in_this_range]
+        line = ax.plot(x_in_this_range,prior_in_this_range,lw=2,color='red',label='Prior distributions')
+    leg_ax = plt.subplot2grid(total_axes, (4,2),colspan=2,rowspan=2)
+    leg_ax.axis('off')
+    hist = mpatches.Patch(color='blue', label='Normalised histograms')
+    leg_ax.legend(handles=line+[hist],loc="center",fontsize=12,bbox_to_anchor=[0.38,0.7])
+    fig.tight_layout()
+    fig.savefig(figs_dir+'all_prior_distributions_and_marginals.png')
+    fig.savefig(figs_dir+'all_prior_distributions_and_marginals.pdf')
+    plt.close()
         
     print "Marginal plots saved in", marginals_dir
 

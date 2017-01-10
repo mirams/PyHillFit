@@ -73,7 +73,7 @@ def run(drug_channel):
     ax1.set_xlim(10**xmin,10**xmax)
     
     for expt in experiment_numbers:
-        ax1.scatter(experiments[expt][:,0],experiments[expt][:,1],label='Expt {}'.format(expt+1),color=colors[expt],s=100)
+        ax1.scatter(experiments[expt][:,0],experiments[expt][:,1],label='Expt {}'.format(expt+1),color=colors[expt],s=100,zorder=10)
     
     for i, conc in enumerate(args.concs):
         ax1.axvline(conc,color=colors[3+i],lw=2,label=r"{} $\mu$M".format(conc),alpha=0.8)
@@ -112,7 +112,7 @@ def run(drug_channel):
     ax3.set_xlim(10**xmin,10**xmax)
     
     for expt in experiment_numbers:
-        ax3.scatter(experiments[expt][:,0],experiments[expt][:,1],label='Expt {}'.format(expt+1),color=colors[expt],s=100)#,zorder=10)
+        ax3.scatter(experiments[expt][:,0],experiments[expt][:,1],label='Expt {}'.format(expt+1),color=colors[expt],s=100,zorder=10)
     
     chain = np.loadtxt(chain_file)
     end = chain.shape[0]
@@ -173,9 +173,9 @@ def run(drug_channel):
     
     for expt in experiment_numbers:
         if expt==1:
-            ax5.scatter(experiments[expt][:,0],experiments[expt][:,1],color='orange',s=100,label='All expts')
+            ax5.scatter(experiments[expt][:,0],experiments[expt][:,1],color='orange',s=100,label='All expts',zorder=10)
         else:
-            ax5.scatter(experiments[expt][:,0],experiments[expt][:,1],color='orange',s=100)
+            ax5.scatter(experiments[expt][:,0],experiments[expt][:,1],color='orange',s=100,zorder=10)
     
     for i, conc in enumerate(args.concs):
         ax5.axvline(conc,color=colors[3+i],alpha=0.8,lw=2,label=r"{} $\mu$M".format(conc))
@@ -203,7 +203,7 @@ def run(drug_channel):
     
     fig.tight_layout()
     fig.savefig(plot_dir+'{}_{}_all_predictions.png'.format(drug,channel))
-    #fig.savefig(plot_dir+'{}_{}_all_predictions.pdf'.format(drug,channel)) # uncomment to save as pdf, or change extension to whatever you want
+    fig.savefig(plot_dir+'{}_{}_all_predictions.pdf'.format(drug,channel)) # uncomment to save as pdf, or change extension to whatever you want
     
 
     plt.close()

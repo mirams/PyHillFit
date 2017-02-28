@@ -3,6 +3,7 @@ import numpy as np
 import numpy.random as npr
 import itertools as it
 import time
+import sys
 import os
 import argparse
 import scipy.stats as st
@@ -21,7 +22,6 @@ Try uncommenting this line if annoying unwanted figure windows open."""
 
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
-import sys
 
 parser = argparse.ArgumentParser()
 

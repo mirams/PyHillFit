@@ -735,7 +735,8 @@ def run_single_level(drug_channel):
     plt.close()
     
     if args.best_fit_only:
-        sys.exit("\nYou asked to quit after doing CMA-ES best fit.\n")
+        print "\nStopping {}+{} after doing and plotting best fit\n".format(drug, channel)
+        return None
 
     # let MCMC look around for a bit before adaptive covariance matrix
     # same rule (100*dimension) as in hierarchical case

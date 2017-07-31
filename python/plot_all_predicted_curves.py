@@ -22,6 +22,7 @@ parser.add_argument("-a", "--all", action='store_true', help='plot histograms fr
 parser.add_argument("-nc", "--num-cores", type=int, help="number of cores to parallelise drug/channel combinations",default=1)
 parser.add_argument("-Ne", "--num_expts", type=int, help="how many experiments to fit to, otherwise will fit to all in the data file",default=0)
 parser.add_argument("--data-file", type=str, help="csv file from which to read in data, in same format as provided crumb_data.csv")
+parser.add_argument("--fix-hill", action='store_true', help="fix Hill=1 through fitting and MCMC",default=False)
 args = parser.parse_args()
 
 dr.setup(args.data_file)
@@ -148,7 +149,7 @@ def run(drug_channel):
     # now plot non-hierarchical
     
     num_params = 3
-    drug,channel,chain_file,figs_dir = dr.nonhierarchical_chain_file_and_figs_dir(drug,channel)
+    drug,channel,chain_file,figs_dir = dr.nonhierarchical_chain_file_and_figs_dir(drug, channel, args.fix_hill)
     chain = np.loadtxt(chain_file,usecols=range(num_params-1)) # not interested in log-target values right now
     end = chain.shape[0]
     burn = end/4

@@ -22,6 +22,12 @@ Alternatively, include the --hierarchical argument:
 python PyHillFit.py --data-file ../data/crumb_data.csv --hierarchical
 ```
 
+There is an optional argument --fix-hill to fix Hill=1, and only vary pIC50 and sigma when doing the MCMC.
+The default, not including this argument, allows Hill to vary.
+```
+python PyHillFit.py --data-file ../data/crumb_data.csv --fix-hill
+```
+
 After running the hierarchical MCMC, you should run:
 ```
 python construct_hierarchical_cdfs.py

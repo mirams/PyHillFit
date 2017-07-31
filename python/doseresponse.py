@@ -93,19 +93,25 @@ def hierarchical_downsampling_folder_and_file(drug,channel):
     output_file = output_dir + '{}_{}_downsampled_alpha_beta_mu_s.txt'.format(drug,channel)
     return output_file
 
-def nonhierarchical_chain_file_and_figs_dir(drug,channel):
+def nonhierarchical_chain_file_and_figs_dir(drug, channel, fix_hill):
     if ('/' in drug):
         drug = drug.replace('/','_')
     if ('/' in channel):
         channel = channel.replace('/','_')
-    output_dir = 'output/{}/nonhierarchical/{}/{}/'.format(dir_name,drug,channel)
+    if fix_hill:
+        output_dir = 'output/{}/nonhierarchical/fix_hill/{}/{}/'.format(dir_name,drug,channel)
+    else:
+        output_dir = 'output/{}/nonhierarchical/vary_hill/{}/{}/'.format(dir_name,drug,channel)
     chain_dir = output_dir+'chain/'
     images_dir = output_dir+'figures/'
     dirs = [output_dir,chain_dir,images_dir]
     for directory in dirs:
         if not os.path.exists(directory):
             os.makedirs(directory)
-    chain_file = chain_dir+'{}_{}_{}_nonhierarchical_chain.txt'.format(dir_name,drug,channel)
+    if fix_hill:
+        chain_file = chain_dir+'{}_{}_{}_nonhierarchical_fix_hill_chain.txt'.format(dir_name,drug,channel)
+    else:
+        chain_file = chain_dir+'{}_{}_{}_nonhierarchical_vary_hill_chain.txt'.format(dir_name,drug,channel)
     return drug,channel,chain_file,images_dir
     
 def alpha_mu_downsampling(drug,channel):

@@ -37,6 +37,7 @@ parser.add_argument("--num-APs", type=int, help="how many (alpha,mu) samples to 
 parser.add_argument("--single", action='store_true', help="run single-level MCMC algorithm",default=True)
 parser.add_argument("--hierarchical", action='store_true', help="run hierarchical MCMC algorithm",default=False)
 parser.add_argument("--fix-hill", action='store_true', help="fix Hill=1 through fitting and MCMC",default=False)
+parser.add_argument("-bfo", "--best-fit-only", action='store_true', help="only do CMA-ES best fit, then quit",default=False)
 
 requiredNamed = parser.add_argument_group('required arguments')
 requiredNamed.add_argument("--data-file", type=str, help="csv file from which to read in data, in same format as provided crumb_data.csv", required=True)
@@ -694,8 +695,15 @@ def run_single_level(drug_channel):
         theta_cur = np.array([pic50_cur,sigma_cur])
     else:
         theta_cur = np.array([hill_cur,pic50_cur,sigma_cur])
-        
     
+    best_params_file = images_dir+"{}_{}_best_fit_params.txt".format(drug, channel)
+    with open(best_params_file, "w") as outfile:
+        outfile.write("# CMA-ES best fit params\n")
+        if args.fix_hill:
+            outfile.write("# pIC50, sigma\n")
+        else:
+            outfile.write("# Hill, pIC50, sigma\n")
+        np.savetxt(outfile, [theta_cur])
     
     proposal_scale = 0.01
 
@@ -725,8 +733,9 @@ def run_single_level(drug_channel):
     best_fit_fig.savefig(images_dir+'{}_{}_CMA-ES_best_fit.png'.format(drug,channel))
     best_fit_fig.savefig(images_dir+'{}_{}_CMA-ES_best_fit.png'.format(drug,channel))
     plt.close()
-
-    #sys.exit() # uncomment if you only want to plot the best fit
+    
+    if args.best_fit_only:
+        sys.exit("\nYou asked to quit after doing CMA-ES best fit.\n")
 
     # let MCMC look around for a bit before adaptive covariance matrix
     # same rule (100*dimension) as in hierarchical case

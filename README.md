@@ -1,5 +1,7 @@
 # *PyHillFit* - python code to perform Bayesian inference of Hill curve parameters from dose-response data
 Code to load dose-response data and fit dose Hill response curves in a Bayesian inference framework.
+
+This code is associated with the paper "*Hierarchical Bayesian inference for ion channel screening dose-response data*". Wellcome Open Research 1:6. [doi:10.12688/wellcomeopenres.9945.2](http://dx.doi.org/10.12688/wellcomeopenres.9945.2).
  
 ## Schematic of inputs and outputs
 

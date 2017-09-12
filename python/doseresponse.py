@@ -1,6 +1,21 @@
 import os
 import pandas as pd
 import numpy as np
+import scipy.stats as st
+
+beta = 2.
+alpha = ((beta+1.)/(beta-1.))**(1./beta)  # for mode at 1
+mu = 4.
+s = 2.
+sigma_uniform_lower = 1e-3
+sigma_uniform_upper = 50.
+pic50_exp_scale = 1./0.2
+pic50_exp_lower = -3.
+hill_uniform_lower = 0.
+hill_uniform_upper = 10.
+log_hill_uniform_const = -np.log(hill_uniform_upper-hill_uniform_lower)
+log_sigma_uniform_const = -np.log(sigma_uniform_upper-sigma_uniform_lower)
+
 
 def setup(given_file):
     global file_name, dir_name, df, drugs, channels
@@ -9,15 +24,7 @@ def setup(given_file):
     df = pd.read_csv(file_name, names=['Drug','Channel','Experiment','Concentration','Inhibition'],skiprows=1)
     drugs = df.Drug.unique()
     channels = df.Channel.unique()
-
-def file_len(fname,num_its):
-    with open(fname,'r') as f:
-        for i, l in enumerate(f):
-            if i < num_its:
-                pass
-            else:
-                return i
-    return i # because first line is header
+    
 
 def list_drug_channel_options(args_all):
     if not args_all:
@@ -37,6 +44,7 @@ def list_drug_channel_options(args_all):
         drugs_to_run = drugs
         channels_to_run = channels
     return drugs_to_run, channels_to_run
+    
     
 def load_crumb_data(drug,channel):
     experiment_numbers = np.array(df[(df['Drug'] == drug) & (df['Channel'] == channel)].Experiment.unique())
@@ -93,25 +101,19 @@ def hierarchical_downsampling_folder_and_file(drug,channel):
     output_file = output_dir + '{}_{}_downsampled_alpha_beta_mu_s.txt'.format(drug,channel)
     return output_file
 
-def nonhierarchical_chain_file_and_figs_dir(drug, channel, fix_hill):
+def nonhierarchical_chain_file_and_figs_dir(model, drug, channel, temperature):
     if ('/' in drug):
         drug = drug.replace('/','_')
     if ('/' in channel):
         channel = channel.replace('/','_')
-    if fix_hill:
-        output_dir = 'output/{}/nonhierarchical/fix_hill/{}/{}/'.format(dir_name,drug,channel)
-    else:
-        output_dir = 'output/{}/nonhierarchical/vary_hill/{}/{}/'.format(dir_name,drug,channel)
+    output_dir = 'output/{}/nonhierarchical/{}/{}/model_{}/temperature_{}/'.format(dir_name, drug, channel, model, temperature)
     chain_dir = output_dir+'chain/'
     images_dir = output_dir+'figures/'
     dirs = [output_dir,chain_dir,images_dir]
     for directory in dirs:
         if not os.path.exists(directory):
             os.makedirs(directory)
-    if fix_hill:
-        chain_file = chain_dir+'{}_{}_{}_nonhierarchical_fix_hill_chain.txt'.format(dir_name,drug,channel)
-    else:
-        chain_file = chain_dir+'{}_{}_{}_nonhierarchical_vary_hill_chain.txt'.format(dir_name,drug,channel)
+    chain_file = chain_dir+'{}_{}_model_{}_temp_{}_chain_nonhierarchical.txt'.format(drug, channel, model, temperature)
     return drug,channel,chain_file,images_dir
     
 def alpha_mu_downsampling(drug,channel):
@@ -127,3 +129,142 @@ def all_predictions_dir(drug,channel):
         os.makedirs(main_dir)
     return main_dir
 
+def log_hill_log_logistic_likelihood(x):
+    return (beta-1.)*np.log(x) - 2.*np.log(1.+(x/alpha)**beta)
+
+
+def log_pic50_logistic_likelihood(x):
+    return -x/s - 2.*np.log(1 + np.exp((mu-x)/s))
+
+
+def log_pic50_exponential(x):
+    """Omitted constant bits like log(scale) and scale*lower"""
+    if x < pic50_exp_lower:
+        return -np.inf
+    else:
+        return -1./pic50_exp_scale*x
+
+
+def log_hill_uniform(x):
+    if (x < hill_uniform_lower) or (x > hill_uniform_upper):
+        return -np.inf
+    else:
+        return log_hill_uniform_const
+        
+        
+def log_sigma_uniform(x):
+    if (x < sigma_uniform_lower) or (x > sigma_uniform_upper):
+        return -np.inf
+    else:
+        return log_sigma_uniform_const      
+
+
+def log_priors_model_1(params):
+    pic50, sigma_sq = params
+    if sigma_sq <= sigma_uniform_lower or sigma_sq > sigma_uniform_upper:
+        return -np.inf
+    else:
+        return log_pic50_exponential(pic50)
+
+
+def log_priors_model_2(params):
+    pic50, hill, sigma_sq = params
+    if sigma_sq <= sigma_uniform_lower or sigma_sq > sigma_uniform_upper:
+        return -np.inf
+    else:
+        return log_hill_uniform(hill) + log_pic50_exponential(pic50)
+
+
+def log_target(y, concs, params, num_pts, t, pi_bit):
+    return log_data_likelihood(y, concs, params, num_pts, t, pi_bit) + log_priors(params)
+
+
+def trapezium_rule(x, y):
+    return 0.5 * np.sum((x[1:]-x[:-1]) * (y[1:]+y[:-1]))
+    
+    
+def define_log_py_file(model, drug, channel):
+    temp_dir = "../output/{}/{}/model_{}/log_pys/".format(drug, channel, model)
+    if not os.path.exists(temp_dir):
+        os.makedirs(temp_dir)
+    return temp_dir+"{}_{}_model_{}_log_pys.txt".format(drug, channel, model)
+
+
+def log_data_likelihood_model_1(y, concs, params, num_pts, t, pi_bit):
+    """
+    Compute log likelihood of data.
+    Note that pi_bit is a constant, so is not needed for MH, but when we're approximating log(p(y)), we need to include it.
+    Of course, we could just add it on after, but I just left it there so I can reuse the exact same code.
+    """
+    pic50, sigma = params
+    predicted_responses = dose_response_model(concs, 1, pic50_to_ic50(pic50))
+    #if sigma_sq <= 0:
+    #    print params
+    temp_1 = num_pts * np.log(sigma)
+    temp_2 = np.sum((y-predicted_responses)**2/(2.*sigma**2))
+    return -t * (pi_bit + temp_1 + temp_2)
+
+
+def log_data_likelihood_model_2(y, concs, params, num_pts, t, pi_bit):
+    """
+    Compute log likelihood of data.
+    Note that pi_bit is a constant, so is not needed for MH, but when we're approximating log(p(y)), we need to include it.
+    Of course, we could just add it on after, but I just left it there so I can reuse the exact same code.
+    """
+    pic50, hill, sigma = params
+    predicted_responses = dose_response_model(concs, hill, pic50_to_ic50(pic50))
+    #if sigma_sq <= 0:
+    #    print params
+    temp_1 = num_pts * np.log(sigma)
+    temp_2 = np.sum((y-predicted_responses)**2/(2.*sigma**2))
+    return -t * (pi_bit + temp_1 + temp_2)
+    
+def define_model(model):
+    """Choose whether to fix Hill = 1 (#1) or allow Hill to vary (#2)"""
+    global log_data_likelihood, log_priors, num_params, file_labels, labels, prior_xs, prior_pdfs
+    num_prior_pts = 1001
+    pic50_lower = -4.
+    pic50_upper = 14.
+    hill_lower = 0.
+    hill_upper = 6.
+    if model == 1:
+        num_params = 2
+        log_data_likelihood = log_data_likelihood_model_1
+        log_priors = log_priors_model_1
+        labels = [r"$pIC_{50}$", r"$\sigma$"]
+        file_labels =  ['pIC50','sigma']
+        #prior_xs = [np.linspace(pic50_lower, pic50_upper, num_prior_pts),
+        #            np.linspace(sigma_uniform_lower,sigma_uniform_upper,num_prior_pts)]
+        prior_xs = [np.linspace(pic50_exp_lower-2, pic50_exp_lower+23, num_prior_pts),
+                    np.concatenate(([sigma_uniform_lower-10,sigma_uniform_lower],(np.linspace(sigma_uniform_lower, sigma_uniform_upper, num_prior_pts)),[sigma_uniform_upper,sigma_uniform_upper+10]))]
+        #prior_pdfs = [st.logistic.pdf(prior_xs[0], loc=mu, scale=s),
+        #              np.ones(num_prior_pts)/(1.*sigma_uniform_upper-sigma_uniform_lower)]
+        prior_pdfs = [st.expon.pdf(prior_xs[0], loc=pic50_exp_lower, scale=pic50_exp_scale),
+                      np.concatenate(([0,0],np.ones(num_prior_pts)/(1.*sigma_uniform_upper-sigma_uniform_lower),[0,0]))]
+    elif model == 2:
+        num_params = 3
+        log_data_likelihood = log_data_likelihood_model_2
+        log_priors = log_priors_model_2
+        labels = [r"$pIC_{50}$", r"$Hill$", r"$\sigma$"]
+        file_labels =  ['pIC50','Hill','sigma']
+        #prior_xs = [np.linspace(pic50_lower, pic50_upper, num_prior_pts),
+        #            np.linspace(hill_lower, hill_upper, num_prior_pts),
+        #            np.linspace(sigma_uniform_lower,sigma_uniform_upper,num_prior_pts)]
+        prior_xs = [np.linspace(pic50_exp_lower-2, pic50_exp_lower+23, num_prior_pts),
+                    np.concatenate(([hill_uniform_lower-2,hill_uniform_lower],
+                                    np.linspace(hill_uniform_lower, hill_uniform_upper, num_prior_pts),
+                                    [hill_uniform_upper,hill_uniform_upper+2])),
+                    np.concatenate(([sigma_uniform_lower - 10, sigma_uniform_lower],
+                                    (np.linspace(sigma_uniform_lower, sigma_uniform_upper, num_prior_pts)),
+                                    [sigma_uniform_upper, sigma_uniform_upper + 10]))]
+        #prior_pdfs = [st.logistic.pdf(prior_xs[0],loc=mu,scale=s),
+        #              st.fisk.pdf(prior_xs[1],c=beta,scale=alpha),
+        #              np.ones(num_prior_pts)/(1.*sigma_uniform_upper-sigma_uniform_lower)]
+        prior_pdfs = [st.expon.pdf(prior_xs[0], loc=pic50_exp_lower, scale=pic50_exp_scale),
+                      np.concatenate(([0,0],np.ones(num_prior_pts) / (1. * hill_uniform_upper - hill_uniform_lower),[0,0])),
+                      np.concatenate(([0, 0], np.ones(num_prior_pts) / (1. * sigma_uniform_upper - sigma_uniform_lower), [0, 0]))]
+
+
+def compute_pi_bit_of_log_likelihood(y):
+    num_pts = len(y)
+    return 0.5 * num_pts * np.log(2 * np.pi)

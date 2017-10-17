@@ -7,6 +7,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import scipy.stats as st
 import itertools as it
+import multiprocessing as mp
 
 parser = argparse.ArgumentParser()
 
@@ -47,7 +48,7 @@ def do_mcmc(temperature):#, theta0):
 
     #theta_cur = np.copy(theta0)
     theta_cur = np.ones(num_params)
-    log_target_cur = dr.log_target(responses, concs, theta_cur, num_pts, temperature, pi_bit)
+    log_target_cur = dr.log_target(responses, where_r_0, where_r_100, where_r_other, concs, theta_cur, temperature, pi_bit)
 
     total_iterations = args.iterations
     thinning = args.thinning
@@ -80,7 +81,7 @@ def do_mcmc(temperature):#, theta0):
             print "loga:", loga
             print "cov_estimate:", cov_estimate
             sys.exit()"""
-        log_target_star = dr.log_target(responses, concs, theta_star, num_pts, temperature, pi_bit)
+        log_target_star = dr.log_target(responses, where_r_0, where_r_100, where_r_other, concs, theta_star, temperature, pi_bit)
         u = npr.rand()
         if np.log(u) < log_target_star - log_target_cur:
             accepted = 1
@@ -118,21 +119,34 @@ for drug,channel in it.product(drugs_to_run, channels_to_run):
     for i in xrange(num_expts):
         concs = np.concatenate((concs, experiments[i][:, 0]))
         responses = np.concatenate((responses, experiments[i][:, 1]))
-
-    num_pts = len(responses)
-    pi_bit = dr.compute_pi_bit_of_log_likelihood(responses)
+        
+    where_r_0 = responses==0
+    where_r_100 = responses==100
+    where_r_other = (0<responses) & (responses<100)
+    
+    print "where_r_0:", where_r_0
+    print "where_r_100:", where_r_100
+    print "where_r_other:", where_r_other
+    
+    pi_bit = dr.compute_pi_bit_of_log_likelihood(where_r_other)
 
     #model = 2  #int(sys.argv[1])
 
-    n = 2
+    n = 40
     c = 3
     temperatures = (np.arange(n+1.)/n)**c
     print "\nDoing temperatures: {}\n".format(temperatures)
 
-    for temperature in temperatures:
+    if args.num_cores>1:
+        pool = mp.Pool(args.num_cores)
+        chains = pool.map_async(do_mcmc,temperatures).get(99999)
+        pool.close()
+        pool.join()
+    
+    for i, temperature in enumerate(temperatures):
         drug,channel,chain_file,images_dir = dr.nonhierarchical_chain_file_and_figs_dir(args.model, drug, channel, temperature)
         print "chain_file:", chain_file
-        chain = do_mcmc(temperature)
+        chain = chains[i]
         np.savetxt(chain_file, chain)
         saved_iterations, num_params_plus_one = chain.shape
         

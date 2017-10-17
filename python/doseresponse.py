@@ -9,7 +9,8 @@ mu = 4.
 s = 2.
 sigma_uniform_lower = 1e-3
 sigma_uniform_upper = 50.
-pic50_exp_scale = 1./0.2
+pic50_exp_rate = 0.2
+pic50_exp_scale = 1./pic50_exp_rate
 pic50_exp_lower = -3.
 hill_uniform_lower = 0.
 hill_uniform_upper = 10.
@@ -142,14 +143,7 @@ def log_pic50_exponential(x):
     if x < pic50_exp_lower:
         return -np.inf
     else:
-        return -1./pic50_exp_scale*x
-
-
-def log_hill_uniform(x):
-    if (x < hill_uniform_lower) or (x > hill_uniform_upper):
-        return -np.inf
-    else:
-        return log_hill_uniform_const
+        return -pic50_exp_rate*x
         
         
 def log_sigma_uniform(x):
@@ -160,23 +154,23 @@ def log_sigma_uniform(x):
 
 
 def log_priors_model_1(params):
-    pic50, sigma_sq = params
-    if sigma_sq <= sigma_uniform_lower or sigma_sq > sigma_uniform_upper:
+    pic50, sigma = params
+    if (sigma < sigma_uniform_lower) or (sigma > sigma_uniform_upper):
         return -np.inf
     else:
         return log_pic50_exponential(pic50)
 
 
 def log_priors_model_2(params):
-    pic50, hill, sigma_sq = params
-    if sigma_sq <= sigma_uniform_lower or sigma_sq > sigma_uniform_upper:
+    pic50, hill, sigma = params
+    if (sigma < sigma_uniform_lower) or (sigma > sigma_uniform_upper) or (hill < hill_uniform_lower) or (hill > hill_uniform_upper):
         return -np.inf
     else:
-        return log_hill_uniform(hill) + log_pic50_exponential(pic50)
+        return log_pic50_exponential(pic50)
 
 
-def log_target(y, concs, params, num_pts, t, pi_bit):
-    return log_data_likelihood(y, concs, params, num_pts, t, pi_bit) + log_priors(params)
+def log_target(y, where_y_0, where_y_100, where_y_other, concs, params, t, pi_bit):
+    return log_data_likelihood(y, where_y_0, where_y_100, where_y_other, concs, params, t, pi_bit) + log_priors(params)
 
 
 def trapezium_rule(x, y):
@@ -190,7 +184,7 @@ def define_log_py_file(model, drug, channel):
     return temp_dir+"{}_{}_model_{}_log_pys.txt".format(drug, channel, model)
 
 
-def log_data_likelihood_model_1(y, concs, params, num_pts, t, pi_bit):
+def log_data_likelihood_model_1_capped(y, where_y_0, where_y_100, where_y_other, concs, params, t, pi_bit):
     """
     Compute log likelihood of data.
     Note that pi_bit is a constant, so is not needed for MH, but when we're approximating log(p(y)), we need to include it.
@@ -200,12 +194,14 @@ def log_data_likelihood_model_1(y, concs, params, num_pts, t, pi_bit):
     predicted_responses = dose_response_model(concs, 1, pic50_to_ic50(pic50))
     #if sigma_sq <= 0:
     #    print params
-    temp_1 = num_pts * np.log(sigma)
-    temp_2 = np.sum((y-predicted_responses)**2/(2.*sigma**2))
-    return -t * (pi_bit + temp_1 + temp_2)
+    y_0_sum = np.sum(np.log(st.norm.cdf(0, predicted_responses[where_y_0], sigma)))
+    y_100_sum = np.sum(np.log(1.-st.norm.cdf(100, predicted_responses[where_y_100], sigma)))
+    temp_1 = where_y_other.sum() * np.log(sigma)
+    temp_2 = np.sum((y[where_y_other]-predicted_responses[where_y_other])**2/(2.*sigma**2))
+    return t * (y_0_sum + y_100_sum - pi_bit - temp_1 - temp_2)
 
 
-def log_data_likelihood_model_2(y, concs, params, num_pts, t, pi_bit):
+def log_data_likelihood_model_2_capped(y, where_y_0, where_y_100, where_y_other, concs, params, t, pi_bit):
     """
     Compute log likelihood of data.
     Note that pi_bit is a constant, so is not needed for MH, but when we're approximating log(p(y)), we need to include it.
@@ -215,9 +211,11 @@ def log_data_likelihood_model_2(y, concs, params, num_pts, t, pi_bit):
     predicted_responses = dose_response_model(concs, hill, pic50_to_ic50(pic50))
     #if sigma_sq <= 0:
     #    print params
-    temp_1 = num_pts * np.log(sigma)
-    temp_2 = np.sum((y-predicted_responses)**2/(2.*sigma**2))
-    return -t * (pi_bit + temp_1 + temp_2)
+    y_0_sum = np.sum(np.log(st.norm.cdf(0, predicted_responses[where_y_0], sigma)))
+    y_100_sum = np.sum(np.log(1.-st.norm.cdf(100, predicted_responses[where_y_100], sigma)))
+    temp_1 = where_y_other.sum() * np.log(sigma)
+    temp_2 = np.sum((y[where_y_other]-predicted_responses[where_y_other])**2/(2.*sigma**2))
+    return t * (y_0_sum + y_100_sum - pi_bit - temp_1 - temp_2)
     
 def define_model(model):
     """Choose whether to fix Hill = 1 (#1) or allow Hill to vary (#2)"""
@@ -229,9 +227,9 @@ def define_model(model):
     hill_upper = 6.
     if model == 1:
         num_params = 2
-        log_data_likelihood = log_data_likelihood_model_1
+        log_data_likelihood = log_data_likelihood_model_1_capped
         log_priors = log_priors_model_1
-        labels = [r"$pIC_{50}$", r"$\sigma$"]
+        labels = [r"$pIC50$", r"$\sigma$"]
         file_labels =  ['pIC50','sigma']
         #prior_xs = [np.linspace(pic50_lower, pic50_upper, num_prior_pts),
         #            np.linspace(sigma_uniform_lower,sigma_uniform_upper,num_prior_pts)]
@@ -243,9 +241,9 @@ def define_model(model):
                       np.concatenate(([0,0],np.ones(num_prior_pts)/(1.*sigma_uniform_upper-sigma_uniform_lower),[0,0]))]
     elif model == 2:
         num_params = 3
-        log_data_likelihood = log_data_likelihood_model_2
+        log_data_likelihood = log_data_likelihood_model_2_capped
         log_priors = log_priors_model_2
-        labels = [r"$pIC_{50}$", r"$Hill$", r"$\sigma$"]
+        labels = [r"$pIC50$", r"$Hill$", r"$\sigma$"]
         file_labels =  ['pIC50','Hill','sigma']
         #prior_xs = [np.linspace(pic50_lower, pic50_upper, num_prior_pts),
         #            np.linspace(hill_lower, hill_upper, num_prior_pts),

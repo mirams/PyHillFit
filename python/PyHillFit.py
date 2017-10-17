@@ -7,7 +7,6 @@ import sys
 import os
 import argparse
 import scipy.stats as st
-import matplotlib.patches as mpatches
 
 try:
     import cma
@@ -22,6 +21,7 @@ matplotlib.use('Agg')
 
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
+import matplotlib.patches as mpatches
 
 parser = argparse.ArgumentParser()
 
@@ -79,9 +79,8 @@ def log_likelihood_single_fix_hill(measurements,doses,theta):
     
 # for finding starting point for MCMC, so if we later decide pIC50 can go down to -2, it doesn't matter, it will just take a few
 # iterations to decide if it wants to go in that direction
-def sum_of_square_diffs(unscaled_params,doses,responses):
-    pIC50 = unscaled_params[0]**2 + dr.pic50_exp_lower # restricting pIC50>pic50_prior[0], previously -1
-    hill = unscaled_params[1]**2 # restricting Hill>0
+def sum_of_square_diffs(_params,doses,responses):
+    pIC50, hill = _params
     IC50 = dr.pic50_to_ic50(pIC50)
     test_responses = dr.dose_response_model(doses,hill,IC50)
     return np.sum((test_responses-responses)**2)
@@ -92,10 +91,6 @@ def initial_sigma(n,sum_of_squares):
     return np.sqrt((1.*sum_of_squares)/n)
     
     
-def initial_sigma_sq(n,sum_of_squares):
-    return (1.*sum_of_squares)/n
-
-
 # for all parts of the log target distribution:
 # -inf is ok, NaN is not!
 # np.log(negative) = nan, so we need to catch negatives first and set the target to -inf
@@ -638,6 +633,8 @@ def run_hierarchical(drug_channel):
 def run_single_level(drug_channel):
 
     drug, channel = drug_channel
+    
+    seed = 100
 
     num_expts, experiment_numbers, experiments = dr.load_crumb_data(drug,channel)
     drug,channel,chain_file,images_dir = dr.nonhierarchical_chain_file_and_figs_dir(args.model, drug, channel, temperature)
@@ -652,12 +649,15 @@ def run_single_level(drug_channel):
     print concs
     print responses
     
-    num_pts = len(responses)
-    pi_bit = dr.compute_pi_bit_of_log_likelihood(responses)
+    where_r_0 = responses==0
+    where_r_100 = responses==100
+    where_r_other = (0<responses) & (responses<100)
     
-    # for reproducible results, otherwise select a new random seed
-    seed = 1
-    npr.seed(seed)
+    print "where_r_0:", where_r_0
+    print "where_r_100:", where_r_100
+    print "where_r_other:", where_r_other
+    
+    pi_bit = dr.compute_pi_bit_of_log_likelihood(where_r_other)
     
     # plot priors
     for i in xrange(num_params):
@@ -672,41 +672,53 @@ def run_single_level(drug_channel):
         plt.close()
 
     start = time.time()
-    x0 = np.array([2.5, 1.]) # not fitting sigma by CMA-ES, can maximise log-likelihood wrt sigma analytically
+    
     sigma0 = 0.1
     opts = cma.CMAOptions()
     opts['seed'] = seed
-    es = cma.CMAEvolutionStrategy(x0, sigma0, opts)
     if args.model==1:
+        #x0 = np.array([2.5, 3.])
+        x0 = np.array([2.5, 1.])
+        es = cma.CMAEvolutionStrategy(x0, sigma0, opts)
         while not es.stop():
             X = es.ask()
-            es.tell(X, [sum_of_square_diffs([x[0],1.],concs,responses) for x in X])
+            #es.tell(X, [-dr.log_target(responses, where_r_0, where_r_100, where_r_other, concs, x**2 + [dr.pic50_exp_lower,dr.sigma_uniform_lower], temperature, pi_bit) for x in X])
+            es.tell(X, [sum_of_square_diffs([x[0]**2+dr.pic50_exp_lower, 1.],concs,responses) for x in X])
             es.disp()
         res = es.result()
-        best_params = [1., res[0][1]]
+        #pic50_cur, sigma_cur = res[0]**2 + [dr.pic50_exp_lower, dr.sigma_uniform_lower]
+        pic50_cur = res[0][0]**2 + dr.pic50_exp_lower
+        hill_cur = 1
     elif args.model==2:
+        #x0 = np.array([2.5, 1., 3.])
+        x0 = np.array([2.5, 1.])
+        es = cma.CMAEvolutionStrategy(x0, sigma0, opts)
         while not es.stop():
             X = es.ask()
-            es.tell(X, [sum_of_square_diffs(x,concs,responses) for x in X])
+            #es.tell(X, [-dr.log_target(responses, where_r_0, where_r_100, where_r_other, concs, x**2 + [dr.pic50_exp_lower, dr.hill_uniform_lower, dr.sigma_uniform_lower], temperature, pi_bit) for x in X])
+            es.tell(X, [sum_of_square_diffs(x**2+[dr.pic50_exp_lower, dr.hill_uniform_lower],concs,responses) for x in X])
             es.disp()
         res = es.result()
-        best_params = res[0]
+        #pic50_cur, hill_cur, sigma_cur = res[0]**2 + [dr.pic50_exp_lower, dr.hill_uniform_lower, dr.sigma_uniform_lower]
+        pic50_cur, hill_cur = res[0]**2 + [dr.pic50_exp_lower, dr.hill_uniform_lower]
+    
 
-    pic50_cur = best_params[0]**2 + dr.pic50_exp_lower
-    hill_cur = best_params[1]**2
     sigma_cur = initial_sigma(len(responses),res[1])
+    print "sigma_cur:", sigma_cur
     
     if args.model==1:
         theta_cur = np.array([pic50_cur,sigma_cur])
     elif args.model==2:
         theta_cur = np.array([pic50_cur,hill_cur,sigma_cur])
+        
+    print "theta_cur:", theta_cur
     
     best_params_file = images_dir+"{}_{}_best_fit_params.txt".format(drug, channel)
     with open(best_params_file, "w") as outfile:
         outfile.write("# CMA-ES best fit params\n")
-        if args.fix_hill:
-            outfile.write("# pIC50, sigma\n")
-        else:
+        if args.model==1:
+            outfile.write("# pIC50, sigma, (Hill=1, not included)\n")
+        elif args.model==2:
             outfile.write("# pIC50, Hill, sigma\n")
         np.savetxt(outfile, [theta_cur])
     
@@ -714,8 +726,8 @@ def run_single_level(drug_channel):
 
     mean_estimate = np.copy(theta_cur)
     cov_estimate = proposal_scale*np.diag(np.copy(np.abs(theta_cur)))
-        
-    cmaes_ll = dr.log_target(responses, concs, theta_cur, num_pts, temperature, pi_bit)
+    
+    cmaes_ll = dr.log_target(responses, where_r_0, where_r_100, where_r_other, concs, theta_cur, temperature, pi_bit)
     print "cmaes_ll:", cmaes_ll
         
     best_fit_fig = plt.figure(figsize=(5,4))
@@ -732,12 +744,12 @@ def run_single_level(drug_channel):
     best_fit_ax.plot(x_range,best_fit_curve,label='Best fit',lw=2)
     best_fit_ax.set_ylabel('% {} block'.format(channel))
     best_fit_ax.set_xlabel(r'{} concentration ($\mu$M)'.format(drug))
-    best_fit_ax.set_title('Hill = {}, pIC50 = {}'.format(np.round(hill_cur,2),np.round(pic50_cur,2)))
-    best_fit_ax.scatter(concs,responses,marker="o",color='orange',s=100,label='Data',zorder=10)
+    best_fit_ax.set_title(r'$pIC50 = {}, Hill = {}; SS = {}$'.format(np.round(pic50_cur,2),np.round(hill_cur,2),round(res[1],2)))
+    best_fit_ax.plot(concs,responses,"o",color='orange',ms=10,label='Data',zorder=10)
     best_fit_ax.legend(loc=2)
     best_fit_fig.tight_layout()
-    best_fit_fig.savefig(images_dir+'{}_{}_CMA-ES_best_fit.png'.format(drug,channel))
-    best_fit_fig.savefig(images_dir+'{}_{}_CMA-ES_best_fit.png'.format(drug,channel))
+    best_fit_fig.savefig(images_dir+'{}_{}_model_{}_CMA-ES_best_fit.png'.format(drug,channel,args.model))
+    best_fit_fig.savefig(images_dir+'{}_{}_model_{}_CMA-ES_best_fit.pdf'.format(drug,channel,args.model))
     plt.close()
     
     if args.best_fit_only:
@@ -748,7 +760,7 @@ def run_single_level(drug_channel):
     # same rule (100*dimension) as in hierarchical case
     when_to_adapt = 1000*num_params
 
-    log_target_cur = dr.log_target(responses, concs, theta_cur, num_pts, temperature, pi_bit)
+    log_target_cur = dr.log_target(responses, where_r_0, where_r_100, where_r_other, concs, theta_cur, temperature, pi_bit)
     
     print "initial log_target_cur =", log_target_cur
 
@@ -779,6 +791,11 @@ def run_single_level(drug_channel):
 
     print "concs:", concs
     print "responses:", responses
+    
+    
+    
+    # for reproducible results, otherwise select a new random seed
+    npr.seed(seed)
 
     # MCMC!
     t = 1
@@ -786,7 +803,7 @@ def run_single_level(drug_channel):
     while t <= total_iterations:
         theta_star = npr.multivariate_normal(theta_cur,np.exp(loga)*cov_estimate)
         accepted = 0
-        log_target_star = dr.log_target(responses, concs, theta_star, num_pts, temperature, pi_bit)
+        log_target_star = dr.log_target(responses, where_r_0, where_r_100, where_r_other, concs, theta_star, temperature, pi_bit)
         accept_prob = npr.rand()
         if (np.log(accept_prob) < log_target_star - log_target_cur):
             theta_cur = theta_star
@@ -814,18 +831,14 @@ def run_single_level(drug_channel):
     print "\nTime taken to do {} MCMC iterations: {} s\n".format(total_iterations, time.time()-start)
     print "Final iteration:", chain[-1,:], "\n"
     
-    with open(chain_file,'w') as outfile:
-        outfile.write('# Nonhierarchical MCMC output for {} + {}: (Hill,pIC50,sigma,log-target)\n'.format(drug,channel))
-        np.savetxt(outfile,chain)
-    
-    try:
-        assert(len(chain[:,0])==saved_iterations)
-    except AssertionError:
-        print "len(chain[:,0])!=saved_iterations"
-        sys.exit()
-        
     burn_fraction = args.burn_in_fraction
     burn = saved_iterations/burn_fraction
+    
+    chain = chain[burn:,:]  # remove burn-in before saving
+    with open(chain_file,'w') as outfile:
+        outfile.write('# Nonhierarchical MCMC output for {} + {}: (Hill,pIC50,sigma,log-target)\n'.format(drug,channel))
+        np.savetxt(outfile,chain)       
+
 
     best_ll_index = np.argmax(chain[:,num_params])
     best_ll_row = chain[best_ll_index,:]
@@ -838,26 +851,26 @@ def run_single_level(drug_channel):
         figs.append(plt.figure())
         axs.append([])
         axs[i].append(figs[i].add_subplot(211))
-        axs[i][0].hist(chain[burn:,i], bins=40, normed=True, color='blue', edgecolor='blue')
+        axs[i][0].hist(chain[:,i], bins=40, normed=True, color='blue', edgecolor='blue')
         axs[i][0].legend()
         axs[i][0].set_title("MCMC marginal distributions")
         axs[i][0].set_ylabel("Normalised frequency")
         axs[i][0].grid()
         plt.setp(axs[i][0].get_xticklabels(), visible=False)
         axs[i].append(figs[i].add_subplot(212,sharex=axs[i][0]))
-        axs[i][1].plot(chain[burn:,i],range(burn,saved_iterations))
+        axs[i][1].plot(chain[:,i],range(burn,saved_iterations))
         axs[i][1].invert_yaxis()
         axs[i][1].set_xlabel(dr.labels[i])
         axs[i][1].set_ylabel('Saved MCMC iteration')
         axs[i][1].grid()
         figs[i].tight_layout()
-        figs[i].savefig(images_dir+'{}_{}_{}_marginal.png'.format(drug,channel,dr.file_labels[i]))
+        figs[i].savefig(images_dir+'{}_{}_model_{}_{}_marginal.png'.format(drug,channel,args.model,dr.file_labels[i]))
         plt.close()
 
     # plot log-target path
     fig2 = plt.figure()
     ax3 = fig2.add_subplot(111)
-    ax3.plot(range(saved_iterations), chain[:,-1])
+    ax3.plot(range(burn, saved_iterations), chain[:,-1])
     ax3.set_xlabel('MCMC iteration')
     ax3.set_ylabel('log-target')
     ax3.grid()
@@ -881,10 +894,10 @@ def run_single_level(drug_channel):
                 subplot_position = num_params*i+j+1
                 if i==j:
                     axes[ij] = matrix_fig.add_subplot(num_params,num_params,subplot_position)
-                    axes[ij].hist(chain[burn:,i],bins=50,normed=True,color='blue', edgecolor='blue')
+                    axes[ij].hist(chain[:,i],bins=50,normed=True,color='blue', edgecolor='blue')
                 elif j==0: # this column shares x-axis with top-left
                     axes[ij] = matrix_fig.add_subplot(num_params,num_params,subplot_position,sharex=axes["00"])
-                    counts, xedges, yedges, Image = axes[ij].hist2d(chain[burn:,j],chain[burn:,i],cmap='hot_r',bins=50,norm=norm)
+                    counts, xedges, yedges, Image = axes[ij].hist2d(chain[:,j],chain[:,i],cmap='hot_r',bins=50,norm=norm)
                     maxcounts = np.amax(counts)
                     if maxcounts > colormax:
                         colormax = maxcounts
@@ -893,7 +906,7 @@ def run_single_level(drug_channel):
                         colormin = mincounts
                 else:
                     axes[ij] = matrix_fig.add_subplot(num_params,num_params,subplot_position,sharex=axes[str(j)+str(j)],sharey=axes[str(i)+"0"])
-                    counts, xedges, yedges, Image = axes[ij].hist2d(chain[burn:,j],chain[burn:,i],cmap='hot_r',bins=50,norm=norm)
+                    counts, xedges, yedges, Image = axes[ij].hist2d(chain[:,j],chain[:,i],cmap='hot_r',bins=50,norm=norm)
                     maxcounts = np.amax(counts)
                     if maxcounts > colormax:
                         colormax = maxcounts
@@ -922,8 +935,8 @@ def run_single_level(drug_channel):
     plt.setp(hidden_labels, visible=False)
     
     matrix_fig.tight_layout()
-    matrix_fig.savefig(images_dir+"{}_{}_scatterplot_matrix.png".format(drug,channel))
-    matrix_fig.savefig(images_dir+"{}_{}_scatterplot_matrix.pdf".format(drug,channel))
+    matrix_fig.savefig(images_dir+"{}_{}_model_{}_scatterplot_matrix.png".format(drug,channel,args.model))
+    matrix_fig.savefig(images_dir+"{}_{}_model_{}_scatterplot_matrix.pdf".format(drug,channel,args.model))
     plt.close()
 
 
@@ -953,7 +966,7 @@ elif (args.num_cores>1):
     import multiprocessing as mp
     num_cores = min(args.num_cores, mp.cpu_count()-1)
     pool = mp.Pool(processes=num_cores)
-    pool.map_async(run,drugs_channels).get(9999999)
+    pool.map_async(run,drugs_channels).get(99999)
     pool.close()
     pool.join()
 

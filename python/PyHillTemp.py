@@ -21,7 +21,7 @@ parser.add_argument("-i", "--iterations", type=int, help="number of MCMC iterati
 parser.add_argument("-t", "--thinning", type=int, help="how often to thin the MCMC, i.e. save every t-th iteration",default=5)
 parser.add_argument("-b", "--burn-in-fraction", type=int, help="given N saved MCMC iterations, discard the first N/b as burn-in",default=4)
 parser.add_argument("-a", "--all", action='store_true', help='run hierarchical MCMC on all drugs and channels', default=False)
-parser.add_argument("-c", "--num-cores", type=int, help="number of cores to parallelise drug/channel combinations",default=1)
+parser.add_argument("-nc", "--num-cores", type=int, help="number of cores to parallelise drug/channel combinations",default=1)
 parser.add_argument("-Ne", "--num_expts", type=int, help="how many experiments to fit to", default=0)
 parser.add_argument("--num-APs", type=int, help="how many (alpha,mu) samples to take for AP simulations", default=500)
 parser.add_argument("--single", action='store_true', help="run single-level MCMC algorithm",default=True)

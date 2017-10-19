@@ -2,6 +2,8 @@ import os
 import pandas as pd
 import numpy as np
 import scipy.stats as st
+#import warnings
+#warnings.filterwarnings("error")
 
 beta = 2.
 alpha = ((beta+1.)/(beta-1.))**(1./beta)  # for mode at 1
@@ -16,6 +18,14 @@ hill_uniform_lower = 0.
 hill_uniform_upper = 10.
 log_hill_uniform_const = -np.log(hill_uniform_upper-hill_uniform_lower)
 log_sigma_uniform_const = -np.log(sigma_uniform_upper-sigma_uniform_lower)
+
+sigma_shape = 5. # for sigma Gamma prior
+sigma_mode = 6.
+sigma_loc = 1e-3
+sigma_scale = scales = (sigma_mode-sigma_loc)/(sigma_shape-1.)
+
+n = 40
+c = 3
 
 
 def setup(given_file):
@@ -155,22 +165,28 @@ def log_sigma_uniform(x):
 
 def log_priors_model_1(params):
     pic50, sigma = params
-    if (sigma < sigma_uniform_lower) or (sigma > sigma_uniform_upper):
-        return -np.inf
-    else:
-        return log_pic50_exponential(pic50)
+    #if (sigma < sigma_uniform_lower) or (sigma > sigma_uniform_upper):
+    #    return -np.inf
+    #else:
+    #    return log_pic50_exponential(pic50)
+    return log_pic50_exponential(pic50) + log_gamma_prior(sigma, sigma_shape, sigma_scale, sigma_loc)
 
 
 def log_priors_model_2(params):
     pic50, hill, sigma = params
-    if (sigma < sigma_uniform_lower) or (sigma > sigma_uniform_upper) or (hill < hill_uniform_lower) or (hill > hill_uniform_upper):
+    #if (sigma < sigma_uniform_lower) or (sigma > sigma_uniform_upper) or (hill < hill_uniform_lower) or (hill > hill_uniform_upper):
+    #    return -np.inf
+    #else:
+    #    return log_pic50_exponential(pic50)
+    if (hill < hill_uniform_lower) or (hill > hill_uniform_upper):
         return -np.inf
     else:
-        return log_pic50_exponential(pic50)
+        return log_pic50_exponential(pic50) + log_gamma_prior(sigma, sigma_shape, sigma_scale, sigma_loc)
 
 
 def log_target(y, where_y_0, where_y_100, where_y_other, concs, params, t, pi_bit):
-    return log_data_likelihood(y, where_y_0, where_y_100, where_y_other, concs, params, t, pi_bit) + log_priors(params)
+    answer = log_data_likelihood(y, where_y_0, where_y_100, where_y_other, concs, params, t, pi_bit) + log_priors(params)
+    return answer
 
 
 def trapezium_rule(x, y):
@@ -185,34 +201,48 @@ def define_log_py_file(model, drug, channel):
 
 
 def log_data_likelihood_model_1_capped(y, where_y_0, where_y_100, where_y_other, concs, params, t, pi_bit):
+    if t == 0:
+        return 0
     """
     Compute log likelihood of data.
     Note that pi_bit is a constant, so is not needed for MH, but when we're approximating log(p(y)), we need to include it.
     Of course, we could just add it on after, but I just left it there so I can reuse the exact same code.
     """
     pic50, sigma = params
+    if sigma <= sigma_uniform_lower:
+        # the -inf actually comes from the prior, but just to fix log of negative
+        return -np.inf
     predicted_responses = dose_response_model(concs, 1, pic50_to_ic50(pic50))
     #if sigma_sq <= 0:
     #    print params
-    y_0_sum = np.sum(np.log(st.norm.cdf(0, predicted_responses[where_y_0], sigma)))
-    y_100_sum = np.sum(np.log(1.-st.norm.cdf(100, predicted_responses[where_y_100], sigma)))
+    y_0_sum = np.sum(st.norm.logcdf(0, predicted_responses[where_y_0], sigma))
+    y_100_sum = np.sum(st.norm.logsf(100, predicted_responses[where_y_100], sigma))
     temp_1 = where_y_other.sum() * np.log(sigma)
     temp_2 = np.sum((y[where_y_other]-predicted_responses[where_y_other])**2/(2.*sigma**2))
-    return t * (y_0_sum + y_100_sum - pi_bit - temp_1 - temp_2)
+    answer = t * (y_0_sum + y_100_sum - pi_bit - temp_1 - temp_2)
+    if np.isnan(answer):
+        print params
+        print predicted_responses
+    return answer
 
 
 def log_data_likelihood_model_2_capped(y, where_y_0, where_y_100, where_y_other, concs, params, t, pi_bit):
+    if t == 0:
+        return 0
     """
     Compute log likelihood of data.
     Note that pi_bit is a constant, so is not needed for MH, but when we're approximating log(p(y)), we need to include it.
     Of course, we could just add it on after, but I just left it there so I can reuse the exact same code.
     """
     pic50, hill, sigma = params
+    if sigma <= sigma_uniform_lower:
+        # the -inf actually comes from the prior, but just to fix log of negative
+        return -np.inf
     predicted_responses = dose_response_model(concs, hill, pic50_to_ic50(pic50))
     #if sigma_sq <= 0:
     #    print params
-    y_0_sum = np.sum(np.log(st.norm.cdf(0, predicted_responses[where_y_0], sigma)))
-    y_100_sum = np.sum(np.log(1.-st.norm.cdf(100, predicted_responses[where_y_100], sigma)))
+    y_0_sum = np.sum(st.norm.logcdf(0, predicted_responses[where_y_0], sigma))
+    y_100_sum = np.sum(st.norm.logsf(100, predicted_responses[where_y_100], sigma))
     temp_1 = where_y_other.sum() * np.log(sigma)
     temp_2 = np.sum((y[where_y_other]-predicted_responses[where_y_other])**2/(2.*sigma**2))
     return t * (y_0_sum + y_100_sum - pi_bit - temp_1 - temp_2)
@@ -234,11 +264,13 @@ def define_model(model):
         #prior_xs = [np.linspace(pic50_lower, pic50_upper, num_prior_pts),
         #            np.linspace(sigma_uniform_lower,sigma_uniform_upper,num_prior_pts)]
         prior_xs = [np.linspace(pic50_exp_lower-2, pic50_exp_lower+23, num_prior_pts),
-                    np.concatenate(([sigma_uniform_lower-10,sigma_uniform_lower],(np.linspace(sigma_uniform_lower, sigma_uniform_upper, num_prior_pts)),[sigma_uniform_upper,sigma_uniform_upper+10]))]
+                    np.linspace(0, 25, num_prior_pts)]
         #prior_pdfs = [st.logistic.pdf(prior_xs[0], loc=mu, scale=s),
         #              np.ones(num_prior_pts)/(1.*sigma_uniform_upper-sigma_uniform_lower)]
+        #prior_pdfs = [st.expon.pdf(prior_xs[0], loc=pic50_exp_lower, scale=pic50_exp_scale),
+        #              np.concatenate(([0,0],np.ones(num_prior_pts)/(1.*sigma_uniform_upper-sigma_uniform_lower),[0,0]))]
         prior_pdfs = [st.expon.pdf(prior_xs[0], loc=pic50_exp_lower, scale=pic50_exp_scale),
-                      np.concatenate(([0,0],np.ones(num_prior_pts)/(1.*sigma_uniform_upper-sigma_uniform_lower),[0,0]))]
+                      st.gamma.pdf(prior_xs[1], sigma_shape, loc=sigma_loc, scale=sigma_scale)]
     elif model == 2:
         num_params = 3
         log_data_likelihood = log_data_likelihood_model_2_capped
@@ -252,17 +284,34 @@ def define_model(model):
                     np.concatenate(([hill_uniform_lower-2,hill_uniform_lower],
                                     np.linspace(hill_uniform_lower, hill_uniform_upper, num_prior_pts),
                                     [hill_uniform_upper,hill_uniform_upper+2])),
-                    np.concatenate(([sigma_uniform_lower - 10, sigma_uniform_lower],
-                                    (np.linspace(sigma_uniform_lower, sigma_uniform_upper, num_prior_pts)),
-                                    [sigma_uniform_upper, sigma_uniform_upper + 10]))]
+                    np.linspace(0, 25, num_prior_pts)]
         #prior_pdfs = [st.logistic.pdf(prior_xs[0],loc=mu,scale=s),
         #              st.fisk.pdf(prior_xs[1],c=beta,scale=alpha),
         #              np.ones(num_prior_pts)/(1.*sigma_uniform_upper-sigma_uniform_lower)]
+        #prior_pdfs = [st.expon.pdf(prior_xs[0], loc=pic50_exp_lower, scale=pic50_exp_scale),
+        #              np.concatenate(([0,0],np.ones(num_prior_pts) / (1. * hill_uniform_upper - hill_uniform_lower),[0,0])),
+        #              np.concatenate(([0, 0], np.ones(num_prior_pts) / (1. * sigma_uniform_upper - sigma_uniform_lower), [0, 0]))]
         prior_pdfs = [st.expon.pdf(prior_xs[0], loc=pic50_exp_lower, scale=pic50_exp_scale),
                       np.concatenate(([0,0],np.ones(num_prior_pts) / (1. * hill_uniform_upper - hill_uniform_lower),[0,0])),
-                      np.concatenate(([0, 0], np.ones(num_prior_pts) / (1. * sigma_uniform_upper - sigma_uniform_lower), [0, 0]))]
+                      st.gamma.pdf(prior_xs[2], sigma_shape, loc=sigma_loc, scale=sigma_scale)]
 
 
 def compute_pi_bit_of_log_likelihood(y):
     num_pts = len(y)
     return 0.5 * num_pts * np.log(2 * np.pi)
+    
+
+def log_gamma_prior(x,shape_param,scale_param,loc_params):
+    # hierarchical prior for noise sigma
+    if np.any(x<loc_params):
+        return -np.inf
+    answer = (shape_param-1)*np.log(x-loc_params) - (x-loc_params)/scale_param
+    if np.any(np.isnan(answer)):
+        print "NaN from dr.log_gamma_prior!"
+        print "x =", x
+        print "shape_param =", shape_param
+        print "scale_param =", scale_param
+        print "loc_param =", loc_params
+        sys.exit()
+    else:
+        return answer

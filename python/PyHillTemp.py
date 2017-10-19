@@ -8,6 +8,12 @@ import matplotlib.pyplot as plt
 import scipy.stats as st
 import itertools as it
 import multiprocessing as mp
+import time
+#import warnings
+#warnings.filterwarnings("error")
+
+seed = 1
+npr.seed(seed)
 
 parser = argparse.ArgumentParser()
 
@@ -41,6 +47,7 @@ dr.setup(args.data_file)
 drugs_to_run, channels_to_run = dr.list_drug_channel_options(args.all)
 
 
+
 def do_mcmc(temperature):#, theta0):
     print "Starting chain"
     
@@ -48,7 +55,9 @@ def do_mcmc(temperature):#, theta0):
 
     #theta_cur = np.copy(theta0)
     theta_cur = np.ones(num_params)
+    print "theta_cur:", theta_cur
     log_target_cur = dr.log_target(responses, where_r_0, where_r_100, where_r_other, concs, theta_cur, temperature, pi_bit)
+    print "log_target_cur:", log_target_cur
 
     total_iterations = args.iterations
     thinning = args.thinning
@@ -132,16 +141,20 @@ for drug,channel in it.product(drugs_to_run, channels_to_run):
 
     #model = 2  #int(sys.argv[1])
 
-    n = 40
-    c = 3
-    temperatures = (np.arange(n+1.)/n)**c
+
+    temperatures = (np.arange(dr.n+1.)/dr.n)**dr.c
     print "\nDoing temperatures: {}\n".format(temperatures)
 
+    start = time.time()
     if args.num_cores>1:
         pool = mp.Pool(args.num_cores)
         chains = pool.map_async(do_mcmc,temperatures).get(99999)
         pool.close()
         pool.join()
+    else:
+        chains = [do_mcmc(t) for t in temperatures]
+    mcmc_time = time.time()-start
+    print "\nMCMC time: {} s\n".format(int(mcmc_time))
     
     for i, temperature in enumerate(temperatures):
         drug,channel,chain_file,images_dir = dr.nonhierarchical_chain_file_and_figs_dir(args.model, drug, channel, temperature)

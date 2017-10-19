@@ -17,7 +17,7 @@ import matplotlib
 """I have found that these two lines are needed on *some* computers to prevent matplotlib figure windows from opening.
 In general, I save the figures but do not actually open the matplotlib figure windows.
 Try uncommenting this line if annoying unwanted figure windows open."""
-matplotlib.use('Agg')
+#matplotlib.use('Agg')
 
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
@@ -157,20 +157,7 @@ def log_beta_prior(x,alpha,beta,a,b):
             sys.exit()
         else:
             return answer
-
-def log_gamma_prior(x,shape_param,scale_param,loc_params):
-    if np.any(x<loc_params):
-        return -np.inf
-    answer = (shape_param-1)*np.log(x-loc_params) - (x-loc_params)/scale_param
-    if np.any(np.isnan(answer)):
-        print "NaN from log_gamma_prior!"
-        print "x =", x
-        print "shape_param =", shape_param
-        print "scale_param =", scale_param
-        print "loc_param =", loc_params
-        sys.exit()
-    else:
-        return answer
+            
 
 def log_target_distribution(experiments,theta,shapes,scales,locs):
     dim = len(theta)
@@ -186,7 +173,7 @@ def log_target_distribution(experiments,theta,shapes,scales,locs):
     total = log_data_likelihood(hill_is,pic50_is,sigma,experiments)
     total += np.sum(log_hill_i_log_logistic_likelihood(hill_is,alpha,beta))
     total += np.sum(log_pic50_i_logistic_likelihood(pic50_is,mu,s))
-    total += np.sum(log_gamma_prior(theta[[0,1,2,3,-1]],shapes,scales,locs))
+    total += np.sum(dr.log_gamma_prior(theta[[0,1,2,3,-1]],shapes,scales,locs))
     if np.isnan(total):
         print "NaN from log_target_distribution!"
         print "theta =", theta
@@ -194,17 +181,22 @@ def log_target_distribution(experiments,theta,shapes,scales,locs):
     else:
         return total
 
+
 def log_logistic_mode(alpha,beta): # from Wikipedia
     return alpha * ((beta-1.)/(beta+1.))**(1./beta)
+
 
 def log_logistic_variance(alpha,beta): # from Wikipedia
     return alpha**2 * (2*np.pi/(beta*np.sin(2*np.pi/beta)) - (np.pi/(beta*np.sin(np.pi/beta)))**2)
 
+
 def logistic_mode(mu,s): # from Wikipedia
     return mu
 
+
 def logistic_variance(mu,s): # from Wikipedia
     return np.pi**2 * s**2 / 3.
+
 
 # hierarchical MCMC
 def run_hierarchical(drug_channel):
@@ -289,7 +281,8 @@ def run_hierarchical(drug_channel):
         fig.savefig(figs_dir+'{}_{}_cma-es_best_fits.pdf'.format(drug,channel))
     plt.close()
     
-    locs = np.array([0.,2.,-4,0.01,1e-3]) # lower bounds for alpha,beta,mu,s,sigma
+    
+    locs = np.array([0.,2.,-4,0.01,dr.sigma_loc]) # lower bounds for alpha,beta,mu,s,sigma
 
     sigma_cur = np.mean(best_fits[:,-1])
     if (sigma_cur <= locs[3]):
@@ -341,14 +334,17 @@ def run_hierarchical(drug_channel):
     beta_mode = np.mean(elkins_hill_betas)
     mu_mode = np.mean(elkins_pic50_mus)
     s_mode = np.mean(elkins_pic50_sigmas)
-    sigma_mode = 6.
+    sigma_mode = dr.sigma_mode
 
     modes = np.array([alpha_mode, beta_mode-2., mu_mode, s_mode, sigma_mode])
 
     print "modes:", modes
     
     # designed for priors to have modes at means of elkins data, but width is more important
-    shapes = np.array([5.,2.5,7.5,2.5,5.]) # must all be greater than 1
+    
+    
+    
+    shapes = np.array([5.,2.5,7.5,2.5,dr.sigma_shape]) # must all be greater than 1
     scales = (modes-locs)/(shapes-1.)
 
     labels = [r'$\alpha$',r'$\beta$',r'$\mu$',r'$s$',r'$\sigma$']
@@ -795,6 +791,7 @@ def run_single_level(drug_channel):
     
     
     # for reproducible results, otherwise select a new random seed
+    seed = 25
     npr.seed(seed)
 
     # MCMC!

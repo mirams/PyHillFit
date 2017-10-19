@@ -3,26 +3,54 @@ import numpy as np
 from glob import glob
 import itertools as it
 import os
+import argparse
+import sys
+import multiprocessing as mp
+
+
+def compute_log_py_approxn(temp):
+    print temp
+    drug,channel,chain_file,images_dir = dr.nonhierarchical_chain_file_and_figs_dir(m, top_drug, top_channel, temp)
+    chain = np.loadtxt(chain_file, usecols=range(dr.num_params))
+    num_its = chain.shape[0]
+    total = 0.
+    start = 0
+    for it in xrange(start,num_its):
+        temperature = 1  # approximating full likelihood
+        temp_bit = dr.log_data_likelihood(responses, where_r_0, where_r_100, where_r_other, concs, chain[it, :], temperature, pi_bit)
+        total += temp_bit
+        if temp_bit == -np.inf:
+            print chain[it, :]
+    answer = total / (num_its-start)
+    if answer == -np.inf:
+        print "ANSWER IS -INF"
+    return answer
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-nc", "--num-cores", type=int, help="number of cores to parallelise drug/channel combinations", default=1)
+
+requiredNamed = parser.add_argument_group('required arguments')
+requiredNamed.add_argument("-d", "--drug", type=int, help="drug index", required=True)
+requiredNamed.add_argument("-c", "--channel", type=int, help="channel index", required=True)
+requiredNamed.add_argument("--data-file", type=str, help="csv file from which to read in data, in same format as provided crumb_data.csv", required=True)
+
+if len(sys.argv)==1:
+    parser.print_help()
+    sys.exit(1)
+
+args = parser.parse_args()
 
 num_models = 2
 model_pairs = it.combinations(range(1, num_models+1), r=2)
 expectations = {}
 
-data_file = "../data/modified_crumb_data.csv"
-#run_all = True
+dr.setup(args.data_file)
 
+top_drug = dr.drugs[args.drug]
+top_channel = dr.channels[args.channel]
 
-
-dr.setup(data_file)
-#drugs_to_run, channels_to_run = dr.list_drug_channel_options(run_all)
-
-drug = 'Amitriptyline'
-channel = 'Cav1.2'
-
-#drug = 'Amiodarone'
-#channel = 'hERG'
-
-num_expts, experiment_numbers, experiments = dr.load_crumb_data(drug, channel)
+num_expts, experiment_numbers, experiments = dr.load_crumb_data(top_drug, top_channel)
 
 concs = np.array([])
 responses = np.array([])
@@ -39,30 +67,28 @@ num_pts = where_r_other.sum()
 for m in xrange(1, num_models+1):
     dr.define_model(m)
 
-    n = 40
-    c = 3
-    temps = (np.arange(n+1.)/n)**c
-
-
+    temps = (np.arange(dr.n+1.)/dr.n)**dr.c
     num_temps = len(temps)
-    log_p_ys = np.zeros(num_temps)
-    for i in xrange(num_temps):
-        print i+1, "/", num_temps
-        drug,channel,chain_file,images_dir = dr.nonhierarchical_chain_file_and_figs_dir(m, drug, channel, temps[i])
-        chain = np.loadtxt(chain_file, usecols=range(dr.num_params))
-        num_its = chain.shape[0]
-        total = 0.
-        start = 0
-        for it in xrange(start,num_its):
-            temperature = 1  # approximating full likelihood
-            total += dr.log_data_likelihood(responses, where_r_0, where_r_100, where_r_other, concs, chain[it, :], temperature, pi_bit)
-        log_p_ys[i] = total / (num_its-start)
+    
+    if args.num_cores == 1:
+        log_p_ys = np.zeros(num_temps)
+        for i in xrange(num_temps):
+            log_p_ys[i] = compute_log_py_approxn(temps[i])
+    elif args.num_cores > 1:
+        pool = mp.Pool(args.num_cores)
+        log_p_ys = np.array(pool.map_async(compute_log_py_approxn, temps).get(9999))
+        pool.close()
+        pool.join()
+    print log_p_ys
     expectations[m] = dr.trapezium_rule(temps, log_p_ys)
+    print expectations
 
 for pair in model_pairs:
     i, j = pair
+    print expectations[i], expectations[j]
     Bij = np.exp(expectations[i]-expectations[j])
-    with open("{}_{}_BF.txt".format(drug,channel), "w") as outfile:
-        outfile.write("{} + {}\n".format(drug,channel))
+    print Bij
+    with open("{}_{}_BF.txt".format(top_drug,top_channel), "w") as outfile:
+        outfile.write("{} + {}\n".format(top_drug,top_channel))
         outfile.write("B_{}{} = {}\n".format(i, j, Bij))
         outfile.write("B_{}{} = {}\n".format(j, i, 1./Bij))

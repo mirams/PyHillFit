@@ -32,6 +32,8 @@ parser.add_argument("-bfo", "--best-fit-only", action='store_true', help="only d
 requiredNamed = parser.add_argument_group('required arguments')
 requiredNamed.add_argument("--data-file", type=str, help="csv file from which to read in data, in same format as provided crumb_data.csv", required=True)
 requiredNamed.add_argument("-m", "--model", type=int, help="For non-hierarchical (put anything for hierarchical):1. fix Hill=1; 2. vary Hill", required=True)
+requiredNamed.add_argument("-d", "--drug", type=int, help="drug index", required=True)
+requiredNamed.add_argument("-c", "--channel", type=int, help="channel index", required=True)
 
 if len(sys.argv)==1:
     parser.print_help()
@@ -44,7 +46,10 @@ num_params = dr.num_params
 
 dr.setup(args.data_file)
 
-drugs_to_run, channels_to_run = dr.list_drug_channel_options(args.all)
+#drugs_to_run, channels_to_run = dr.list_drug_channel_options(args.all)
+
+drugs_to_run = [dr.drugs[args.drug]]
+channels_to_run = [dr.channels[args.channel]]
 
 
 

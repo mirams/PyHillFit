@@ -27,7 +27,9 @@ top_channel = dr.channels[args.channel]
 
 temperatures = (np.arange(dr.n+1.)/dr.n)**dr.c
 
-for t in temperatures:
+ts = [temperatures[0], temperatures[-1]]
+
+for t in ts:
     drug,channel,chain_file,images_dir = dr.nonhierarchical_chain_file_and_figs_dir(args.model, top_drug, top_channel, t)
     if not os.path.isfile(chain_file):
         print "{}, {}, model {}, temp {} - NOT FOUND".format(top_drug, top_channel, args.model, t)

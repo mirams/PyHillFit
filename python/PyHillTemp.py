@@ -4,6 +4,7 @@ import numpy as np
 import sys
 import numpy.random as npr
 import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import scipy.stats as st
 import itertools as it

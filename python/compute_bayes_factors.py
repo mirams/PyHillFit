@@ -82,13 +82,22 @@ for m in xrange(1, num_models+1):
     print log_p_ys
     expectations[m] = dr.trapezium_rule(temps, log_p_ys)
     print expectations
-
+    
+drug, channel, chain_file, images_dir = dr.nonhierarchical_chain_file_and_figs_dir(1, top_drug, top_channel, 1)
+bf_dir = "BFs/"
+if not os.path.exists(bf_dir):
+    os.makedirs(bf_dir)
+bf_file = bf_dir + "{}_{}_B12.txt".format(drug,channel)
 for pair in model_pairs:
     i, j = pair
-    print expectations[i], expectations[j]
+    #print expectations[i], expectations[j]
     Bij = np.exp(expectations[i]-expectations[j])
-    print Bij
-    with open("{}_{}_BF.txt".format(top_drug,top_channel), "w") as outfile:
-        outfile.write("{} + {}\n".format(top_drug,top_channel))
-        outfile.write("B_{}{} = {}\n".format(i, j, Bij))
-        outfile.write("B_{}{} = {}\n".format(j, i, 1./Bij))
+    #print Bij
+    #with open("{}_{}_BF.txt".format(drug,channel), "w") as outfile:
+    #    outfile.write("{} + {}\n".format(drug,channel))
+    #    outfile.write("B_{}{} = {}\n".format(i, j, Bij))
+    #    outfile.write("B_{}{} = {}\n".format(j, i, 1./Bij))
+    np.savetxt(bf_file, [Bij])
+
+
+

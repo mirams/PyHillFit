@@ -37,3 +37,5 @@ min_idx = np.unravel_index(np.argmin(BFs), (30,7))
 
 print "max B12: {}, {} + {}".format(BFs[max_idx], dr.drugs[max_idx[0]], dr.channels[max_idx[1]])
 print "max B21: {}, {} + {}".format(1./BFs[min_idx], dr.drugs[min_idx[0]], dr.channels[min_idx[1]])
+
+print "B21 > B12 in {} cases".format(np.sum(BFs<1))

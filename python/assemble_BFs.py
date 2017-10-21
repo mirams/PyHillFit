@@ -32,8 +32,8 @@ for i, j in drugs_channels_idx:
 
     BFs[i, j] = np.loadtxt(bf_file)
     
-max_idx = np.argmax(BFs)
-min_idx = np.argmin(BFs)
+max_idx = np.unravel_index(np.argmax(BFs), (30,7))
+min_idx = np.unravel_index(np.argmin(BFs), (30,7))
 
 print "max:", BFs[max_idx]
 print "min:", BFs[min_idx]

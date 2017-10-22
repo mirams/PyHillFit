@@ -27,7 +27,7 @@ if len(sys.argv)==1:
 args = parser.parse_args()
 
 dr.define_model(args.model)
-temperature = 1
+temperature = 1.0
 num_params = dr.num_params
 
 # load data from specified data file
@@ -39,7 +39,6 @@ drugs_to_run, channels_to_run = dr.list_drug_channel_options(args.all)
 
 num_curves = 750
 num_pts = 201
-
 
 
 def do_plots(drug_channel):
@@ -89,13 +88,14 @@ def do_plots(drug_channel):
         ax.plot(x, dr.dose_response_model(x,hills[i],dr.pic50_to_ic50(pic50s[i])), color='black', alpha=0.02)
     for expt in experiment_numbers:
         if expt==1:
-            ax.scatter(experiments[expt][:,0],experiments[expt][:,1],color='orange',s=100,label='Expt',zorder=10)
+            ax.plot(experiments[expt][:,0],experiments[expt][:,1],"o",color='orange',ms=10,label='Data',zorder=10)
         else:
-            ax.scatter(experiments[expt][:,0],experiments[expt][:,1],color='orange',s=100,zorder=10)
+            ax.plot(experiments[expt][:,0],experiments[expt][:,1],"o",color='orange',ms=10,zorder=10)
     ax.legend(loc=2,fontsize=12)
     fig.tight_layout()
+    print "\n{}\n".format(images_dir)
     fig.savefig(images_dir+"{}_{}_nonh_model_{}_mcmc_prediction_curves.png".format(drug, channel, args.model))
-    fig.savefig(images_dir+"{}_{}_nonh_model_{}_mcmc_prediction_curves.pdf".format(drug, channel, args.model))
+    #fig.savefig(images_dir+"{}_{}_nonh_model_{}_mcmc_prediction_curves.pdf".format(drug, channel, args.model))
     plt.close()
     
     return None

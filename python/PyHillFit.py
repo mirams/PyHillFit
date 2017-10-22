@@ -1,3 +1,9 @@
+import matplotlib
+"""I have found that these two lines are needed on *some* computers to prevent matplotlib figure windows from opening.
+In general, I save the figures but do not actually open the matplotlib figure windows.
+Try uncommenting this line if annoying unwanted figure windows open."""
+matplotlib.use('Agg')
+
 import doseresponse as dr
 import numpy as np
 import numpy.random as npr
@@ -12,12 +18,6 @@ try:
     import cma
 except:
     sys.exit("couldn't find module cma")
-
-import matplotlib
-"""I have found that these two lines are needed on *some* computers to prevent matplotlib figure windows from opening.
-In general, I save the figures but do not actually open the matplotlib figure windows.
-Try uncommenting this line if annoying unwanted figure windows open."""
-matplotlib.use('Agg')
 
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm

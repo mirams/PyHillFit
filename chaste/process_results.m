@@ -27,11 +27,15 @@ for drug_idx = 1:length(drug_names)
     figure(1)
     h(drug_idx) = histogram(d.data(:,3),20);
     hold all
+    if strcmp(drug_names{drug_idx},'Quinidine')
+        sort(d.data(:,3))
+    end
+    
     [max_val, i] = max(h(drug_idx).Values);
     x = h(drug_idx).BinEdges(i);
     y = 1.05*max_val;
-    text_obj = text(x,y,drug_names{drug_idx});
-    set(text_obj, 'rotation', 45)
+    %text_obj = text(x,y,drug_names{drug_idx});
+    %set(text_obj, 'rotation', 45)
     set(h(drug_idx),'FaceColor',colour_order(drug_idx,:)) 
     
     values = h(drug_idx).Values;

@@ -107,7 +107,7 @@ ax.set_xlabel('Best $M_2 Hill$')
 ax.set_zlabel('Hill s.d.')
 ax.grid()
 ax.scatter(best_m2_hills, all_BFs, m2_hill_sds, zorder=10)
-fig.tight_layout()
+#fig.tight_layout()
 fig.savefig("B12_vs_best_cmaes_M2_Hill_vs_posterior_sd.png")
 plt.show(block=True)
 

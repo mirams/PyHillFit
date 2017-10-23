@@ -20,6 +20,9 @@ dr.setup(args.data_file)
 
 drugs_channels_idx = it.product(range(30), range(7))
 BFs = np.zeros((30, 7))
+best_params_m1 = {}
+best_params_m2 = {}
+best_params = [best_params_m1, best_params_m2]
 
 for i, j in drugs_channels_idx:
 
@@ -31,6 +34,16 @@ for i, j in drugs_channels_idx:
     bf_file = bf_dir + "{}_{}_B12.txt".format(drug,channel)
 
     BFs[i, j] = np.loadtxt(bf_file)
+    
+    for m in range(1,3):
+        drug, channel, chain_file, images_dir = dr.nonhierarchical_chain_file_and_figs_dir(m, top_drug, top_channel, 1)
+        best_params_file = images_dir+"{}_{}_best_fit_params.txt".format(drug, channel)
+        best_params[m-1][(i,j)] = np.loadtxt(best_params_file)
+    
+    if BFs[i, j] > 1:
+        print "{} + {}: B12 = {}".format(drug, channel, BFs[i, j])
+        print "M1 best fit: {}".format(best_params[0][(i,j)])
+        print "M2 best fit: {}".format(best_params[1][(i,j)])
     
 max_idx = np.unravel_index(np.argmax(BFs), (30,7))
 min_idx = np.unravel_index(np.argmin(BFs), (30,7))

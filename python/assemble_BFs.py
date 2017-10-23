@@ -4,8 +4,8 @@ import itertools as it
 import os
 import argparse
 import sys
-import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.pyplot as plt
 #import matplotlib.image as mpimg
 
 parser = argparse.ArgumentParser()
@@ -95,7 +95,8 @@ where_max_hill = np.unravel_index(np.argmax(best_m2_hills), (30,7))
 print "\nmax best_m2_hill from {} + {}".format(dr.drugs[where_max_hill[0]], dr.channels[where_max_hill[1]])
 
 fig = plt.figure(figsize=(4,3))
-ax = fig.add_subplot(111, projection='3d')
+#ax = fig.add_subplot(111, projection='3d')  # for newer matplotlib
+ax = Axes3D(fig)  # for older matplotlib
 ax.set_yscale('log')
 ax.set_xscale('log')
 ax.set_xlim(10**-1, 10**2)

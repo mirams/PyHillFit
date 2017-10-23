@@ -49,7 +49,7 @@ for i, j in drugs_channels_idx:
     model = 2
     temp = 1.0
     drug, channel, chain_file, images_dir = dr.nonhierarchical_chain_file_and_figs_dir(model, top_drug, top_channel, temp)
-    chain = np.loadtxt(chain_file, usecols=[1,2])
+    chain = np.loadtxt(chain_file, usecols=[1,3])
     best_post_idx = np.argmax(chain[:,-1])
     best_posterior_m2_hills.append(chain[best_post_idx, 0])
     
@@ -62,7 +62,7 @@ for i, j in drugs_channels_idx:
         print "LESS THAN 1e-2"
         print "{} + {}: B12 = {}".format(drug, channel, BFs[i, j])
         print "log-targets:"
-        for k in range(-3,30):
+        for k in range(-3,3):
             if k==0:
                 print "Next should be best"
             print chain[best_post_idx+k, -1]

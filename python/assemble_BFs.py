@@ -54,12 +54,18 @@ for i, j in drugs_channels_idx:
     best_posterior_m2_hills.append(chain[best_post_idx, 0])
     
     if BFs[i, j] > 1:
-        print "{} + {}: B12 = {}".format(drug, channel, BFs[i, j])
-        print "M1 best fit: {}".format(best_params[0][(i,j)])
-        print "M2 best fit: {}".format(best_params[1][(i,j)])
+        #print "{} + {}: B12 = {}".format(drug, channel, BFs[i, j])
+        #print "M1 best fit: {}".format(best_params[0][(i,j)])
+        #print "M2 best fit: {}".format(best_params[1][(i,j)])
+        pass
     elif BFs[i, j] < 1e-2:
         print "LESS THAN 1e-2"
         print "{} + {}: B12 = {}".format(drug, channel, BFs[i, j])
+        for k in range(-3,30):
+            if k==0:
+                print "Next should be best"
+            print chain[best_post_idx+k, 0]
+        print "\n"
         #print "M1 best fit: {}".format(best_params[0][(i,j)])
         #print "M2 best fit: {}".format(best_params[1][(i,j)])
         

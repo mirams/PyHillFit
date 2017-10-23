@@ -50,7 +50,7 @@ for i, j in drugs_channels_idx:
         print "M2 best fit: {}".format(best_params[1][(i,j)])
         
     all_BFs.append(BFs[i, j])
-    best_m2_hills.append(best_params[1][(i,j)])
+    best_m2_hills.append(best_params[1][(i,j)][1])
     
 max_idx = np.unravel_index(np.argmax(BFs), (30,7))
 min_idx = np.unravel_index(np.argmin(BFs), (30,7))

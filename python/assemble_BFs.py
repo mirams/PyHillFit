@@ -108,6 +108,8 @@ for i, j in it.product(range(30), range(7)):
     if all_BFs[idx] < 1e-2:
         txt = "{}\n{}".format(dr.drugs[i], dr.channels[j])
         print txt
+        print "hill:", best_posterior_m2_hills[idx]
+        print "B12:", all_BFs[idx]
         ax2.annotate(txt, (best_posterior_m2_hills[idx], all_BFs[idx]))
 
 plt.show(block=True)

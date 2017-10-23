@@ -28,6 +28,8 @@ best_params = [best_params_m1, best_params_m2]
 best_m2_hills = []
 all_BFs = []
 
+best_posterior_m2_hills = []
+
 for i, j in drugs_channels_idx:
 
     top_drug = dr.drugs[i]
@@ -43,6 +45,11 @@ for i, j in drugs_channels_idx:
         drug, channel, chain_file, images_dir = dr.nonhierarchical_chain_file_and_figs_dir(m, top_drug, top_channel, 1)
         best_params_file = images_dir+"{}_{}_best_fit_params.txt".format(drug, channel)
         best_params[m-1][(i,j)] = np.loadtxt(best_params_file)
+        
+        if m==2:
+            chain = np.loadtxt(chain_file, usecols=[1,2])
+            best_post_idx = np.argmax(chain[:,-1])
+            best_posterior_m2_hills.append(chain[best_post_idx, 0])
     
     if BFs[i, j] > 1:
         print "{} + {}: B12 = {}".format(drug, channel, BFs[i, j])
@@ -77,6 +84,21 @@ ax.set_xlabel('Best $M_2 Hill$')
 ax.grid()
 ax.scatter(best_m2_hills, all_BFs, zorder=10)
 fig.tight_layout()
-fig.savefig("B12_vs_best_M2_Hill.png")
+fig.savefig("B12_vs_best_cmaes_M2_Hill.png")
+
+fig2 = plt.figure(figsize=(4,3))
+ax2 = fig2.add_subplot(111)
+ax2.set_yscale('log')
+ax2.set_xscale('log')
+ax2.set_xlim(10**-1, 10**2)
+ax2.axhline(1, color='red', lw=2)
+ax2.axvline(1, color='green', lw=2)
+ax2.set_ylabel('$B_{12}$')
+ax2.set_xlabel('Best $M_2 Hill$')
+ax2.grid()
+ax2.scatter(best_posterior_m2_hills, all_BFs, zorder=10)
+fig2.tight_layout()
+fig2.savefig("B12_vs_best_post_density_M2_Hill.png")
+
 plt.show(block=True)
 

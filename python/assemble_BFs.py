@@ -62,6 +62,8 @@ print "B21 > B12 in {} cases".format(np.sum(BFs<1))
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
+ax.set_yscale('log')
+ax.grid()
 ax.scatter(best_m2_hills, all_BFs)
 plt.show(block=True)
 

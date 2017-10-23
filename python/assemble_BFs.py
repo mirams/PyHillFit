@@ -53,11 +53,11 @@ for i, j in drugs_channels_idx:
     best_post_idx = np.argmax(chain[:,-1])
     best_posterior_m2_hills.append(chain[best_post_idx, 0])
     
-    if BFs[i, j] > 1:
-        #print "{} + {}: B12 = {}".format(drug, channel, BFs[i, j])
+    if 1 < BFs[i, j] < 1 + 1e-2:
+        print "NEARLY 1"
+        print "{} + {}: B12 = {}".format(drug, channel, BFs[i, j])
         #print "M1 best fit: {}".format(best_params[0][(i,j)])
         #print "M2 best fit: {}".format(best_params[1][(i,j)])
-        pass
     elif BFs[i, j] < 1e-2:
         print "LESS THAN 1e-2"
         print "{} + {}: B12 = {}".format(drug, channel, BFs[i, j])

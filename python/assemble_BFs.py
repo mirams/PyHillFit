@@ -57,6 +57,11 @@ for i, j in drugs_channels_idx:
         print "{} + {}: B12 = {}".format(drug, channel, BFs[i, j])
         print "M1 best fit: {}".format(best_params[0][(i,j)])
         print "M2 best fit: {}".format(best_params[1][(i,j)])
+    elif BFs[i, j] < 1e-2:
+        print "LESS THAN 1e-2"
+        print "{} + {}: B12 = {}".format(drug, channel, BFs[i, j])
+        #print "M1 best fit: {}".format(best_params[0][(i,j)])
+        #print "M2 best fit: {}".format(best_params[1][(i,j)])
         
     all_BFs.append(BFs[i, j])
     best_m2_hills.append(best_params[1][(i,j)][1])
@@ -104,7 +109,7 @@ fig2.tight_layout()
 
 for i, j in it.product(range(30), range(7)):
     idx = 7*i + j
-    print idx, all_BFs[idx]
+    #print idx, all_BFs[idx]
     if all_BFs[idx] < 1e-2:
         txt = "{}\n{}".format(dr.drugs[i], dr.channels[j])
         print txt

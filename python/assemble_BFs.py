@@ -88,7 +88,7 @@ ax.scatter(best_m2_hills, all_BFs, zorder=10)
 fig.tight_layout()
 fig.savefig("B12_vs_best_cmaes_M2_Hill.png")
 
-fig2 = plt.figure(figsize=(4,3))
+fig2 = plt.figure()#figsize=(4,3))
 ax2 = fig2.add_subplot(111)
 ax2.set_yscale('log')
 ax2.set_xscale('log')
@@ -100,7 +100,13 @@ ax2.set_xlabel('Best $M_2 Hill$')
 ax2.grid()
 ax2.scatter(best_posterior_m2_hills, all_BFs, zorder=10)
 fig2.tight_layout()
-fig2.savefig("B12_vs_best_post_density_M2_Hill.png")
+#fig2.savefig("B12_vs_best_post_density_M2_Hill.png")
+
+for i, j in drugs_channels_idx:
+    idx = 7*i + j
+    if all_BFs[idx] < 10**-2:
+        txt = "{}\n{}".format(dr.drugs[i], dr.channels[j])
+        ax2.annotate(txt, (best_posterior_m2_hills[idx],all_BFs[idx]))
 
 plt.show(block=True)
 

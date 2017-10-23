@@ -102,7 +102,7 @@ ax2.scatter(best_posterior_m2_hills, all_BFs, zorder=10)
 fig2.tight_layout()
 #fig2.savefig("B12_vs_best_post_density_M2_Hill.png")
 
-for i, j in drugs_channels_idx:
+for i, j in it.product(range(30), range(7)):
     idx = 7*i + j
     print idx, all_BFs[idx]
     if all_BFs[idx] < 1e-2:

@@ -60,7 +60,7 @@ for i, j in drugs_channels_idx:
     #best_post_idx = np.argmax(chain[:,-1])
     #best_posterior_m2_hills.append(chain[best_post_idx, 0])
     
-    if 0.9 < BFs[i, j] < 1.1:
+    """if 0.9 < BFs[i, j] < 1.1:
         abiguous_BFs.append((top_drug, top_channel))
         #print "NEARLY 1"
         #print "{} + {}: B12 = {}".format(drug, channel, BFs[i, j])
@@ -74,7 +74,7 @@ for i, j in drugs_channels_idx:
             if k==0:
                 print "Next should be best"
             print chain[best_post_idx+k, -1]
-        print "\n"
+        print "\n""""
         #print "M1 best fit: {}".format(best_params[0][(i,j)])
         #print "M2 best fit: {}".format(best_params[1][(i,j)])
         
@@ -134,10 +134,10 @@ fig2.tight_layout()
         print "B12:", all_BFs[idx]
         ax2.annotate(txt, (best_posterior_m2_hills[idx], all_BFs[idx]))"""
 
-plt.close()
+"""plt.close()
 print "\nAmbiguous B12s:"
 for q in abiguous_BFs:
-    print q
+    print q"""
 
 """model = 2
 temp = 1.0

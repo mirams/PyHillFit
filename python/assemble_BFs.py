@@ -74,7 +74,7 @@ for i, j in drugs_channels_idx:
             if k==0:
                 print "Next should be best"
             print chain[best_post_idx+k, -1]
-        print "\n""""
+        print 0"""
         #print "M1 best fit: {}".format(best_params[0][(i,j)])
         #print "M2 best fit: {}".format(best_params[1][(i,j)])
         

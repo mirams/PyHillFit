@@ -104,6 +104,7 @@ fig2.tight_layout()
 
 for i, j in drugs_channels_idx:
     idx = 7*i + j
+    print idx, all_BFs[idx]
     if all_BFs[idx] < 1e-2:
         txt = "{}\n{}".format(dr.drugs[i], dr.channels[j])
         print txt

@@ -46,10 +46,12 @@ for i, j in drugs_channels_idx:
         best_params_file = images_dir+"{}_{}_best_fit_params.txt".format(drug, channel)
         best_params[m-1][(i,j)] = np.loadtxt(best_params_file)
         
-        if m==2:
-            chain = np.loadtxt(chain_file, usecols=[1,2])
-            best_post_idx = np.argmax(chain[:,-1])
-            best_posterior_m2_hills.append(chain[best_post_idx, 0])
+    model = 2
+    temp = 1.0
+    drug, channel, chain_file, images_dir = dr.nonhierarchical_chain_file_and_figs_dir(model, top_drug, top_channel, temp)
+    chain = np.loadtxt(chain_file, usecols=[1,2])
+    best_post_idx = np.argmax(chain[:,-1])
+    best_posterior_m2_hills.append(chain[best_post_idx, 0])
     
     if BFs[i, j] > 1:
         print "{} + {}: B12 = {}".format(drug, channel, BFs[i, j])

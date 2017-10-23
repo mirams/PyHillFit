@@ -60,8 +60,10 @@ print "max B21: {}, {} + {}".format(1./BFs[min_idx], dr.drugs[min_idx[0]], dr.ch
 
 print "B21 > B12 in {} cases".format(np.sum(BFs<1))
 
-print "\n min best_m2_hill: {}".format(min(best_m2_hills))
-print "\n max best_m2_hill: {}".format(max(best_m2_hills))
+print "\nmin best_m2_hill: {}".format(min(best_m2_hills))
+print "\nmax best_m2_hill: {}".format(max(best_m2_hills))
+where_max_hill = np.unravel_index(np.argmax(best_m2_hills), (30,7))
+print "\nmax best_m2_hill from {} + {}".format(drugs[where_max_hill[0]], channels[where_max_hill[1]])
 
 fig = plt.figure(figsize=(4,3))
 ax = fig.add_subplot(111)
@@ -75,6 +77,6 @@ ax.set_xlabel('Best $M_2 Hill$')
 ax.grid()
 ax.scatter(best_m2_hills, all_BFs, zorder=10)
 fig.tight_layout()
-fig.savefig("B21_vs_best_M2_Hill.png")
+fig.savefig("B12_vs_best_M2_Hill.png")
 plt.show(block=True)
 

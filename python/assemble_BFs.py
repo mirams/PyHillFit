@@ -30,6 +30,8 @@ all_BFs = []
 
 best_posterior_m2_hills = []
 
+abiguous_BFs = []
+
 for i, j in drugs_channels_idx:
 
     top_drug = dr.drugs[i]
@@ -54,8 +56,9 @@ for i, j in drugs_channels_idx:
     best_posterior_m2_hills.append(chain[best_post_idx, 0])
     
     if 0.9 < BFs[i, j] < 1.1:
-        print "NEARLY 1"
-        print "{} + {}: B12 = {}".format(drug, channel, BFs[i, j])
+        abiguous_BFs.append("{} + {}".format(drug, channel))
+        #print "NEARLY 1"
+        #print "{} + {}: B12 = {}".format(drug, channel, BFs[i, j])
         #print "M1 best fit: {}".format(best_params[0][(i,j)])
         #print "M2 best fit: {}".format(best_params[1][(i,j)])
     elif BFs[i, j] < 1e-2:
@@ -124,5 +127,8 @@ for i, j in it.product(range(30), range(7)):
         print "B12:", all_BFs[idx]
         ax2.annotate(txt, (best_posterior_m2_hills[idx], all_BFs[idx]))
 
-plt.show(block=True)
+plt.close()
+print "\nAmbiguous B12s:"
+for q in abiguous_BFs:
+    print q
 

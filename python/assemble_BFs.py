@@ -5,7 +5,8 @@ import os
 import argparse
 import sys
 import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
+from mpl_toolkits.mplot3d import Axes3D
+#import matplotlib.image as mpimg
 
 parser = argparse.ArgumentParser()
 
@@ -29,7 +30,9 @@ best_params = [best_params_m1, best_params_m2]
 best_m2_hills = []
 all_BFs = []
 
-best_posterior_m2_hills = []
+m2_hill_sds = []
+
+#best_posterior_m2_hills = []
 
 abiguous_BFs = []
 
@@ -52,9 +55,10 @@ for i, j in drugs_channels_idx:
     model = 2
     temp = 1.0
     drug, channel, chain_file, images_dir = dr.nonhierarchical_chain_file_and_figs_dir(model, top_drug, top_channel, temp)
-    chain = np.loadtxt(chain_file, usecols=[1,3])
-    best_post_idx = np.argmax(chain[:,-1])
-    best_posterior_m2_hills.append(chain[best_post_idx, 0])
+    chain = np.loadtxt(chain_file, usecols=[1])
+    m2_hill_sds.append(np.std(np.loadtxt(chain_file, usecols=[1])))
+    #best_post_idx = np.argmax(chain[:,-1])
+    #best_posterior_m2_hills.append(chain[best_post_idx, 0])
     
     if 0.9 < BFs[i, j] < 1.1:
         abiguous_BFs.append((top_drug, top_channel))
@@ -91,20 +95,22 @@ where_max_hill = np.unravel_index(np.argmax(best_m2_hills), (30,7))
 print "\nmax best_m2_hill from {} + {}".format(dr.drugs[where_max_hill[0]], dr.channels[where_max_hill[1]])
 
 fig = plt.figure(figsize=(4,3))
-ax = fig.add_subplot(111)
+ax = fig.add_subplot(111, projection='3d')
 ax.set_yscale('log')
 ax.set_xscale('log')
 ax.set_xlim(10**-1, 10**2)
-ax.axhline(1, color='red', lw=2)
-ax.axvline(1, color='green', lw=2)
+#ax.axhline(1, color='red', lw=2)
+#ax.axvline(1, color='green', lw=2)
 ax.set_ylabel('$B_{12}$')
 ax.set_xlabel('Best $M_2 Hill$')
+ax.set_zlabel('Hill s.d.')
 ax.grid()
-ax.scatter(best_m2_hills, all_BFs, zorder=10)
+ax.scatter(best_m2_hills, all_BFs, m2_hill_sds, zorder=10)
 fig.tight_layout()
-fig.savefig("B12_vs_best_cmaes_M2_Hill.png")
+fig.savefig("B12_vs_best_cmaes_M2_Hill_vs_posterior_sd.png")
+plt.show(block=True)
 
-fig2 = plt.figure()#figsize=(4,3))
+"""fig2 = plt.figure()#figsize=(4,3))
 ax2 = fig2.add_subplot(111)
 ax2.set_yscale('log')
 ax2.set_xscale('log')
@@ -116,9 +122,9 @@ ax2.set_xlabel('Best $M_2 Hill$')
 ax2.grid()
 ax2.scatter(best_posterior_m2_hills, all_BFs, zorder=10)
 fig2.tight_layout()
-#fig2.savefig("B12_vs_best_post_density_M2_Hill.png")
+#fig2.savefig("B12_vs_best_post_density_M2_Hill.png")"""
 
-for i, j in it.product(range(30), range(7)):
+"""for i, j in it.product(range(30), range(7)):
     idx = 7*i + j
     #print idx, all_BFs[idx]
     if all_BFs[idx] < 1e-2:
@@ -126,18 +132,19 @@ for i, j in it.product(range(30), range(7)):
         print txt
         print "hill:", best_posterior_m2_hills[idx]
         print "B12:", all_BFs[idx]
-        ax2.annotate(txt, (best_posterior_m2_hills[idx], all_BFs[idx]))
+        ax2.annotate(txt, (best_posterior_m2_hills[idx], all_BFs[idx]))"""
 
 plt.close()
 print "\nAmbiguous B12s:"
 for q in abiguous_BFs:
     print q
 
-model = 2
+"""model = 2
 temp = 1.0
 for d_c in abiguous_BFs:
     d, c = d_c
     drug, channel, chain_file, images_dir = dr.nonhierarchical_chain_file_and_figs_dir(model, d, c, temp)
     img = mpimg.imread(images_dir + "{}_{}_Hill_marginal.png".format(drug, channel))
     plt.imshow(img)
-    plt.show(block=True)
+    plt.show(block=True)"""
+

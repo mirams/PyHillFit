@@ -104,7 +104,7 @@ fig2.tight_layout()
 
 for i, j in drugs_channels_idx:
     idx = 7*i + j
-    if all_BFs[idx] < 10**-2:
+    if all_BFs[idx] < 1e-2:
         txt = "{}\n{}".format(dr.drugs[i], dr.channels[j])
         ax2.annotate(txt, (best_posterior_m2_hills[idx],all_BFs[idx]))
 

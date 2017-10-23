@@ -61,10 +61,11 @@ for i, j in drugs_channels_idx:
     elif BFs[i, j] < 1e-2:
         print "LESS THAN 1e-2"
         print "{} + {}: B12 = {}".format(drug, channel, BFs[i, j])
+        print "log-targets:"
         for k in range(-3,30):
             if k==0:
                 print "Next should be best"
-            print chain[best_post_idx+k, 0]
+            print chain[best_post_idx+k, -1]
         print "\n"
         #print "M1 best fit: {}".format(best_params[0][(i,j)])
         #print "M2 best fit: {}".format(best_params[1][(i,j)])

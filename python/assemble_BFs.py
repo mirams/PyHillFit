@@ -60,6 +60,9 @@ print "max B21: {}, {} + {}".format(1./BFs[min_idx], dr.drugs[min_idx[0]], dr.ch
 
 print "B21 > B12 in {} cases".format(np.sum(BFs<1))
 
+print "\n min best_m2_hill: {}".format(min(best_m2_hills))
+print "\n max best_m2_hill: {}".format(max(best_m2_hills))
+
 fig = plt.figure(figsize=(4,4))
 ax = fig.add_subplot(111)
 ax.set_yscale('log')

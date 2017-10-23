@@ -63,7 +63,7 @@ print "B21 > B12 in {} cases".format(np.sum(BFs<1))
 print "\nmin best_m2_hill: {}".format(min(best_m2_hills))
 print "\nmax best_m2_hill: {}".format(max(best_m2_hills))
 where_max_hill = np.unravel_index(np.argmax(best_m2_hills), (30,7))
-print "\nmax best_m2_hill from {} + {}".format(drugs[where_max_hill[0]], channels[where_max_hill[1]])
+print "\nmax best_m2_hill from {} + {}".format(dr.drugs[where_max_hill[0]], dr.channels[where_max_hill[1]])
 
 fig = plt.figure(figsize=(4,3))
 ax = fig.add_subplot(111)

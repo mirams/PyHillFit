@@ -36,6 +36,10 @@ m2_hill_sds = []
 
 abiguous_BFs = []
 
+m2_chain_dir = "/home/rossj/arcus-b-py-output"
+def m2_chain_file(drug, channel):
+    return m2_chain_dir + "{}_{}_model_2_temp_1.0_chain_nonhierarchical.txt".format(drug, channel)
+
 for i, j in drugs_channels_idx:
 
     top_drug = dr.drugs[i]
@@ -55,7 +59,6 @@ for i, j in drugs_channels_idx:
     model = 2
     temp = 1.0
     drug, channel, chain_file, images_dir = dr.nonhierarchical_chain_file_and_figs_dir(model, top_drug, top_channel, temp)
-    chain = np.loadtxt(chain_file, usecols=[1])
     m2_hill_sds.append(np.std(np.loadtxt(chain_file, usecols=[1])))
     #best_post_idx = np.argmax(chain[:,-1])
     #best_posterior_m2_hills.append(chain[best_post_idx, 0])
@@ -93,6 +96,15 @@ print "\nmin best_m2_hill: {}".format(min(best_m2_hills))
 print "\nmax best_m2_hill: {}".format(max(best_m2_hills))
 where_max_hill = np.unravel_index(np.argmax(best_m2_hills), (30,7))
 print "\nmax best_m2_hill from {} + {}".format(dr.drugs[where_max_hill[0]], dr.channels[where_max_hill[1]])
+
+print "\nbest_m2_hills:"
+print "["+",".join([str(i) for i in best_m2_hills])+"]"
+print "\nall_BFs:"
+print "["+",".join([str(i) for i in all_BFs])+"]"
+print "\nm2_hill_sds:"
+print "["+",".join([str(i) for i in m2_hill_sds])+"]"
+
+sys.exit()
 
 fig = plt.figure(figsize=(4,3))
 #ax = fig.add_subplot(111, projection='3d')  # for newer matplotlib

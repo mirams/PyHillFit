@@ -106,8 +106,8 @@ print "\nmax best_m2_hill from {} + {}".format(dr.drugs[where_max_hill[0]], dr.c
 print "\nall_BFs =", "["+",".join([str(i) for i in all_BFs])+"]"
 print "\nbest_m2_hills =", "["+",".join([str(i) for i in best_m2_hills])+"]"
 print "\nm2_hill_sds =", "["+",".join([str(i) for i in m2_hill_sds])+"]"
-print "\nbest_m2_pic50s =", "["+",".join([str(i) for i in nbest_m2_pic50s])+"]"
-print "\nm2_pic50_sds =", "["+",".join([str(i) for i in nm2_pic50_sds])+"]"
+print "\nbest_m2_pic50s =", "["+",".join([str(i) for i in best_m2_pic50s])+"]"
+print "\nm2_pic50_sds =", "["+",".join([str(i) for i in m2_pic50_sds])+"]"
 
 sys.exit()
 

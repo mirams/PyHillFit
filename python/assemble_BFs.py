@@ -59,9 +59,11 @@ for i, j in drugs_channels_idx:
     model = 2
     temp = 1.0
     drug, channel, chain_file, images_dir = dr.nonhierarchical_chain_file_and_figs_dir(model, top_drug, top_channel, temp)
-    m2_hill_sds.append(np.std(np.loadtxt(chain_file, usecols=[1])))
-    #best_post_idx = np.argmax(chain[:,-1])
-    #best_posterior_m2_hills.append(chain[best_post_idx, 0])
+    
+    chain = np.loadtxt(chain_file, usecols=[1,3])  # hill and log-target
+    m2_hill_sds.append(np.std(chain[:,0]))
+    best_post_idx = np.argmax(chain[:,1])
+    best_m2_hills.append(chain[best_post_idx, 0])
     
     """if 0.9 < BFs[i, j] < 1.1:
         abiguous_BFs.append((top_drug, top_channel))
@@ -82,7 +84,7 @@ for i, j in drugs_channels_idx:
         #print "M2 best fit: {}".format(best_params[1][(i,j)])
         
     all_BFs.append(BFs[i, j])
-    best_m2_hills.append(best_params[1][(i,j)][1])
+    #best_m2_hills.append(best_params[1][(i,j)][1])
     
 max_idx = np.unravel_index(np.argmax(BFs), (30,7))
 min_idx = np.unravel_index(np.argmin(BFs), (30,7))

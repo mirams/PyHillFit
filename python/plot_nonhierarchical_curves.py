@@ -116,11 +116,9 @@ def do_plots(drug_channel):
 
 
     fig.tight_layout()
-    plt.show(block=True)
-    sys.exit()
+    #plt.show(block=True)
+    #sys.exit()
     
-    
-    print "\n{}\n".format(images_dir)
     fig.savefig("{}_{}_nonh_both_models_mcmc_prediction_curves.png".format(drug, channel))
     plt.close()
     

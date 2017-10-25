@@ -6,7 +6,7 @@ import argparse
 import sys
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
-#import matplotlib.image as mpimg
+import matplotlib.image as mpimg
 
 parser = argparse.ArgumentParser()
 
@@ -69,7 +69,7 @@ for i, j in drugs_channels_idx:
     best_m2_hills.append(chain[best_post_idx, 1])
     best_m2_pic50s.append(chain[best_post_idx, 0])
     
-    """if 0.9 < BFs[i, j] < 1.1:
+    if 0.9 < BFs[i, j] < 1.1:
         abiguous_BFs.append((top_drug, top_channel))
         #print "NEARLY 1"
         #print "{} + {}: B12 = {}".format(drug, channel, BFs[i, j])
@@ -83,7 +83,7 @@ for i, j in drugs_channels_idx:
             if k==0:
                 print "Next should be best"
             print chain[best_post_idx+k, -1]
-        print 0"""
+        print 0
         #print "M1 best fit: {}".format(best_params[0][(i,j)])
         #print "M2 best fit: {}".format(best_params[1][(i,j)])
         
@@ -157,12 +157,12 @@ print "\nAmbiguous B12s:"
 for q in abiguous_BFs:
     print q"""
 
-"""model = 2
+model = 2
 temp = 1.0
 for d_c in abiguous_BFs:
     d, c = d_c
     drug, channel, chain_file, images_dir = dr.nonhierarchical_chain_file_and_figs_dir(model, d, c, temp)
     img = mpimg.imread(images_dir + "{}_{}_Hill_marginal.png".format(drug, channel))
     plt.imshow(img)
-    plt.show(block=True)"""
+    plt.show(block=True)
 

@@ -34,7 +34,7 @@ dr.setup(args.data_file)
 # can select more than one of either
 drugs_to_run, channels_to_run = dr.list_drug_channel_options(args.all)
 
-num_curves = 750
+num_curves = 1500
 num_pts = 201
 
 
@@ -122,7 +122,7 @@ def do_plots(drug_channel):
     hills = chain[rand_idx, 1]
     m2_mcmc.set_title("$M_2$ MCMC fits")
     for i in xrange(num_curves):
-        m2_mcmc.plot(x, dr.dose_response_model(x, hills[i], dr.pic50_to_ic50(pic50s[i])), color='black', alpha=0.02)
+        m2_mcmc.plot(x, dr.dose_response_model(x, hills[i], dr.pic50_to_ic50(pic50s[i])), color='black', alpha=0.01)
     m2_mcmc.plot(concs,responses,"o",color='orange',ms=10,label='Data',zorder=10)
 
 

@@ -101,7 +101,7 @@ def do_plots(drug_channel):
     pic50s = chain[rand_idx, 0]
     m1_mcmc.set_title("$M_1$ MCMC fits")
     for i in xrange(num_curves):
-        ax.plot(x, dr.dose_response_model(x, 1., dr.pic50_to_ic50(pic50s[i])), color='black', alpha=0.02)
+        m1_mcmc.plot(x, dr.dose_response_model(x, 1., dr.pic50_to_ic50(pic50s[i])), color='black', alpha=0.02)
         m1_mcmc.plot(concs,responses,"o",color='orange',ms=10,label='Data',zorder=10)
     
     plt.show(block=True)

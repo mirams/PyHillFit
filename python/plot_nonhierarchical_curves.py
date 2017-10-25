@@ -79,7 +79,7 @@ def do_plots(drug_channel):
 
     
     model = 1
-    drug,channel,chain_file,images_dir = dr.nonhierarchical_chain_file_and_figs_dir(args.model, drug, channel, temperature)
+    drug,channel,chain_file,images_dir = dr.nonhierarchical_chain_file_and_figs_dir(model, drug, channel, temperature)
     
     chain = np.loadtxt(chain_file)
     best_idx = np.argmax(chain[:,-1])
@@ -96,10 +96,10 @@ def do_plots(drug_channel):
     
     rand_idx = npr.randint(saved_its, size=num_curves)
 
-    if args.model==1:
+    if model==1:
         pic50s = chain[rand_idx, 0]
         hills = np.ones(num_curves)
-    elif args.model==2:
+    elif model==2:
         pic50s, hills = chain[rand_idx, :2].T
     
     
@@ -117,8 +117,7 @@ def do_plots(drug_channel):
     ax.legend(loc=2,fontsize=12)
     fig.tight_layout()
     print "\n{}\n".format(images_dir)
-    fig.savefig(images_dir+"{}_{}_nonh_both_models_mcmc_prediction_curves.png".format(drug, channel, args.model))
-    #fig.savefig(images_dir+"{}_{}_nonh_model_{}_mcmc_prediction_curves.pdf".format(drug, channel, args.model))
+    fig.savefig(images_dir+"{}_{}_nonh_both_models_mcmc_prediction_curves.png".format(drug, channel))
     plt.close()
     
     return None

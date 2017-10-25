@@ -83,17 +83,13 @@ def do_plots(drug_channel):
     best_idx = np.argmax(chain[:,-1])
     best_pic50, best_sigma = chain[best_idx, [0,1]]
     
-    m1_best.set_title("$M_1, pIC50 = {}, Hill = 1$".format(round(best_pic50,2)))    
+    m1_best.set_title(r"$M_1, pIC50 = {}, Hill = 1, \sigma = {}$".format(round(best_pic50,2), round(best_sigma,2)))    
     max_pd_curve = dr.dose_response_model(x, 1., dr.pic50_to_ic50(best_pic50))
     m1_best.plot(x, max_pd_curve, label='Max PD', lw=2, color='blue')
     m1_best.plot(x, max_pd_curve + 1.96*best_sigma, "r--", label='95% CI', lw=2)
     m1_best.plot(x, max_pd_curve - 1.96*best_sigma, "r--", lw=2)
     m1_best.plot(concs,responses,"o",color='orange',ms=10,label='Data',zorder=10)
     m1_best.legend(loc=2)
-    
-
-    
-    
     
     saved_its, h = chain.shape
     rand_idx = npr.randint(saved_its, size=num_curves)
@@ -102,22 +98,40 @@ def do_plots(drug_channel):
     m1_mcmc.set_title("$M_1$ MCMC fits")
     for i in xrange(num_curves):
         m1_mcmc.plot(x, dr.dose_response_model(x, 1., dr.pic50_to_ic50(pic50s[i])), color='black', alpha=0.02)
-        m1_mcmc.plot(concs,responses,"o",color='orange',ms=10,label='Data',zorder=10)
+    m1_mcmc.plot(concs,responses,"o",color='orange',ms=10,label='Data',zorder=10)
     
+    model = 2
+    drug,channel,chain_file,images_dir = dr.nonhierarchical_chain_file_and_figs_dir(model, top_drug, top_channel, temperature)
+    
+    chain = np.loadtxt(chain_file)
+    best_idx = np.argmax(chain[:,-1])
+    best_pic50, best_hill, best_sigma = chain[best_idx, [0,1,2]]
+    
+    m2_best.set_title(r"$M_1, pIC50 = {}, Hill = {}, \sigma = {}$".format(round(best_pic50,2), round(best_hill,2),round(best_sigma,2)))    
+    max_pd_curve = dr.dose_response_model(x, best_hill, dr.pic50_to_ic50(best_pic50))
+    m2_best.plot(x, max_pd_curve, label='Max PD', lw=2, color='blue')
+    m2_best.plot(x, max_pd_curve + 1.96*best_sigma, "r--", label='95% CI', lw=2)
+    m2_best.plot(x, max_pd_curve - 1.96*best_sigma, "r--", lw=2)
+    m2_best.plot(concs,responses,"o",color='orange',ms=10,label='Data',zorder=10)
+    m2_best.legend(loc=2)
+    
+    saved_its, h = chain.shape
+    rand_idx = npr.randint(saved_its, size=num_curves)
+
+    pic50s = chain[rand_idx, 0]
+    hills = chain[rand_idx, 1]
+    m2_mcmc.set_title("$M_2$ MCMC fits")
+    for i in xrange(num_curves):
+        m2_mcmc.plot(x, dr.dose_response_model(x, hills[i], dr.pic50_to_ic50(pic50s[i])), color='black', alpha=0.02)
+    m2_mcmc.plot(concs,responses,"o",color='orange',ms=10,label='Data',zorder=10)
+
+
+
+    fig.tight_layout()
     plt.show(block=True)
     sys.exit()
     
-    m2_best.set_title("$M_2, pIC50 = {}, Hill = {}$".format())
-    m2_mcmc.set_title("$M_2$ MCMC fits")
-
-
-    for expt in experiment_numbers:
-        if expt==1:
-            ax.plot(experiments[expt][:,0],experiments[expt][:,1],"o",color='orange',ms=10,label='Data',zorder=10)
-        else:
-            ax.plot(experiments[expt][:,0],experiments[expt][:,1],"o",color='orange',ms=10,zorder=10)
-    ax.legend(loc=2,fontsize=12)
-    fig.tight_layout()
+    
     print "\n{}\n".format(images_dir)
     fig.savefig(images_dir+"{}_{}_nonh_both_models_mcmc_prediction_curves.png".format(drug, channel))
     plt.close()

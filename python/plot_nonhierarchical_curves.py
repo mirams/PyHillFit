@@ -63,18 +63,14 @@ def do_plots(drug_channel):
 
     x = np.logspace(xmin,xmax,num_pts)
     
-    fig, axs = plt.subplots(2, 2, figsize=(9,8), sharey=True)
-    axs = axs.flatten()
-    for ax in axs:
-        ax.set_xscale('log')
-        ax.grid()
-        ax.set_xlim(10**xmin,10**xmax)
-        ax.set_ylim(0,100)
-        ax.set_xlabel(r'{} concentration ($\mu$M)'.format(top_drug))
-    
-    m1_best, m1_mcmc, m2_best, m2_mcmc = axs
-    for ax in [m1_best, m2_best]:
-        ax.set_ylabel(r'% {} block'.format(top_channel))
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(9,4), sharey=True, sharex=True)
+    ax1.set_xscale('log')
+    ax1.grid()
+    ax2.grid()
+    ax1.set_xlim(10**xmin,10**xmax)
+    ax1.set_ylim(0,100)
+    ax1.set_xlabel(r'{} concentration ($\mu$M)'.format(top_drug))
+    ax1.set_ylabel(r'% {} block'.format(top_channel))
     
     model = 1
     drug,channel,chain_file,images_dir = dr.nonhierarchical_chain_file_and_figs_dir(model, top_drug, top_channel, temperature)
@@ -83,22 +79,17 @@ def do_plots(drug_channel):
     best_idx = np.argmax(chain[:,-1])
     best_pic50, best_sigma = chain[best_idx, [0,1]]
     
-    m1_best.set_title(r"$M_1, pIC50 = {}, Hill = 1, \sigma = {}$".format(round(best_pic50,2), round(best_sigma,2)))    
-    max_pd_curve = dr.dose_response_model(x, 1., dr.pic50_to_ic50(best_pic50))
-    m1_best.plot(x, max_pd_curve, label='Max PD', lw=2, color='blue')
-    m1_best.plot(x, max_pd_curve + 1.96*best_sigma, "r--", label='95% CI', lw=2)
-    m1_best.plot(x, max_pd_curve - 1.96*best_sigma, "r--", lw=2)
-    m1_best.plot(concs,responses,"o",color='orange',ms=10,label='Data',zorder=10)
-    m1_best.legend(loc=2)
-    
     saved_its, h = chain.shape
     rand_idx = npr.randint(saved_its, size=num_curves)
 
     pic50s = chain[rand_idx, 0]
-    m1_mcmc.set_title("$M_1$ MCMC fits")
+    ax1.set_title("$M_1$")
     for i in xrange(num_curves):
-        m1_mcmc.plot(x, dr.dose_response_model(x, 1., dr.pic50_to_ic50(pic50s[i])), color='black', alpha=0.02)
-    m1_mcmc.plot(concs,responses,"o",color='orange',ms=10,label='Data',zorder=10)
+        ax1.plot(x, dr.dose_response_model(x, 1., dr.pic50_to_ic50(pic50s[i])), color='black', alpha=0.02)
+    max_pd_curve = dr.dose_response_model(x, 1., dr.pic50_to_ic50(best_pic50))
+    ax1.plot(x, max_pd_curve, label='Max PD', lw=1, color='blue')
+    ax1.plot(concs,responses,"o",color='orange',ms=10,label='Data',zorder=10)
+    ax1.legend(loc=2)
     
     model = 2
     drug,channel,chain_file,images_dir = dr.nonhierarchical_chain_file_and_figs_dir(model, top_drug, top_channel, temperature)
@@ -107,23 +98,19 @@ def do_plots(drug_channel):
     best_idx = np.argmax(chain[:,-1])
     best_pic50, best_hill, best_sigma = chain[best_idx, [0,1,2]]
     
-    m2_best.set_title(r"$M_1, pIC50 = {}, Hill = {}, \sigma = {}$".format(round(best_pic50,2), round(best_hill,2),round(best_sigma,2)))    
-    max_pd_curve = dr.dose_response_model(x, best_hill, dr.pic50_to_ic50(best_pic50))
-    m2_best.plot(x, max_pd_curve, label='Max PD', lw=2, color='blue')
-    m2_best.plot(x, max_pd_curve + 1.96*best_sigma, "r--", label='95% CI', lw=2)
-    m2_best.plot(x, max_pd_curve - 1.96*best_sigma, "r--", lw=2)
-    m2_best.plot(concs,responses,"o",color='orange',ms=10,label='Data',zorder=10)
-    m2_best.legend(loc=2)
+    ax2.set_title("$M_2$")
     
     saved_its, h = chain.shape
     rand_idx = npr.randint(saved_its, size=num_curves)
 
     pic50s = chain[rand_idx, 0]
     hills = chain[rand_idx, 1]
-    m2_mcmc.set_title("$M_2$ MCMC fits")
     for i in xrange(num_curves):
-        m2_mcmc.plot(x, dr.dose_response_model(x, hills[i], dr.pic50_to_ic50(pic50s[i])), color='black', alpha=0.01)
-    m2_mcmc.plot(concs,responses,"o",color='orange',ms=10,label='Data',zorder=10)
+        ax2.plot(x, dr.dose_response_model(x, hills[i], dr.pic50_to_ic50(pic50s[i])), color='black', alpha=0.01)
+    max_pd_curve = dr.dose_response_model(x, best_hill, dr.pic50_to_ic50(best_pic50))
+    ax2.plot(x, max_pd_curve, label='Max PD', lw=2, color='blue')
+    ax2.plot(concs,responses,"o",color='orange',ms=10,label='Data',zorder=10)
+    ax2.legend(loc=2)
 
 
 

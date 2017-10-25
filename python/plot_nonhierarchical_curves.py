@@ -91,28 +91,26 @@ def do_plots(drug_channel):
     m1_best.plot(concs,responses,"o",color='orange',ms=10,label='Data',zorder=10)
     m1_best.legend(loc=2)
     
-    plt.show(block=True)
-    sys.exit()
+
     
-    m1_mcmc.set_title("$M_1$ MCMC fits")
+    
     
     saved_its, h = chain.shape
-    
     rand_idx = npr.randint(saved_its, size=num_curves)
 
-    if model==1:
-        pic50s = chain[rand_idx, 0]
-        hills = np.ones(num_curves)
-    elif model==2:
-        pic50s, hills = chain[rand_idx, :2].T
+    pic50s = chain[rand_idx, 0]
+    m1_mcmc.set_title("$M_1$ MCMC fits")
+    for i in xrange(num_curves):
+        ax.plot(x, dr.dose_response_model(x, 1., dr.pic50_to_ic50(pic50s[i])), color='black', alpha=0.02)
+        m1_mcmc.plot(concs,responses,"o",color='orange',ms=10,label='Data',zorder=10)
     
-    
+    plt.show(block=True)
+    sys.exit()
     
     m2_best.set_title("$M_2, pIC50 = {}, Hill = {}$".format())
     m2_mcmc.set_title("$M_2$ MCMC fits")
 
-    for i in xrange(num_curves):
-        ax.plot(x, dr.dose_response_model(x,hills[i],dr.pic50_to_ic50(pic50s[i])), color='black', alpha=0.02)
+
     for expt in experiment_numbers:
         if expt==1:
             ax.plot(experiments[expt][:,0],experiments[expt][:,1],"o",color='orange',ms=10,label='Data',zorder=10)

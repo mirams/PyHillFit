@@ -25,9 +25,7 @@ if len(sys.argv)==1:
 
 args = parser.parse_args()
 
-dr.define_model(args.model)
 temperature = 1.0
-num_params = dr.num_params
 
 # load data from specified data file
 dr.setup(args.data_file)

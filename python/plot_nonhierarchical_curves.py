@@ -76,8 +76,7 @@ def do_plots(drug_channel):
     for ax in [m1_best, m2_best]:
         ax.set_ylabel(r'% {} block'.format(top_channel))
         
-    m1_best.set_title("$M_1, pIC50 = {}, Hill = 1$".format())
-    m1_mcmc.set_title("$M_1$ MCMC fits")
+
     
     model = 1
     drug,channel,chain_file,images_dir = dr.nonhierarchical_chain_file_and_figs_dir(args.model, drug, channel, temperature)
@@ -89,6 +88,9 @@ def do_plots(drug_channel):
     m1_best.plot(concs,responses,"o",color='orange',ms=10,label='Data',zorder=10)
     plt.show(block=True)
     sys.exit()
+    
+    m1_best.set_title("$M_1, pIC50 = {}, Hill = 1$".format())
+    m1_mcmc.set_title("$M_1$ MCMC fits")
     
     saved_its, h = chain.shape
     

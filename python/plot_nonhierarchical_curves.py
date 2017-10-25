@@ -18,7 +18,6 @@ parser.add_argument("-c", "--num-cores", type=int, help="number of cores to para
 
 requiredNamed = parser.add_argument_group('required arguments')
 requiredNamed.add_argument("--data-file", type=str, help="csv file from which to read in data, in same format as provided crumb_data.csv", required=True)
-requiredNamed.add_argument("-m", "--model", type=int, help="For non-hierarchical (put anything for hierarchical):1. fix Hill=1; 2. vary Hill", required=True)
 
 if len(sys.argv)==1:
     parser.print_help()
@@ -42,10 +41,15 @@ num_pts = 201
 
 
 def do_plots(drug_channel):
-    drug, channel = drug_channel
+    top_drug, top_channel = drug_channel
 
-    num_expts, experiment_numbers, experiments = dr.load_crumb_data(drug,channel)
-    drug,channel,chain_file,images_dir = dr.nonhierarchical_chain_file_and_figs_dir(args.model, drug, channel, temperature)
+    num_expts, experiment_numbers, experiments = dr.load_crumb_data(top_drug, top_channel)
+    
+    concs = np.array([])
+    responses = np.array([])
+    for i in xrange(num_expts):
+        concs = np.concatenate((concs,experiments[i][:,0]))
+        responses = np.concatenate((responses,experiments[i][:,1]))
     
     xmin = 1000
     xmax = -1000
@@ -61,7 +65,32 @@ def do_plots(drug_channel):
 
     x = np.logspace(xmin,xmax,num_pts)
     
+    fig, axs = plt.subplots(2, 2, figsize=(9,8), sharey=True)
+    axs = axs.flatten()
+    for ax in axs:
+        ax.set_xscale('log')
+        ax.grid()
+        ax.set_xlim(10**xmin,10**xmax)
+        ax.set_ylim(0,100)
+        ax.set_xlabel(r'{} concentration ($\mu$M)'.format(drug))
+    
+    m1_best, m1_mcmc, m2_best, m2_mcmc = axs
+    for ax in [m1_best, m2_best]:
+        ax.set_ylabel(r'% {} block'.format(channel))
+        
+    m1_best.set_title("$M_1, pIC50 = {}, Hill = 1$".format())
+    m1_mcmc.set_title("$M_1$ MCMC fits")
+    
+    model = 1
+    drug,channel,chain_file,images_dir = dr.nonhierarchical_chain_file_and_figs_dir(args.model, drug, channel, temperature)
+    
     chain = np.loadtxt(chain_file)
+    best_idx = np.argmax(chain[:,-1])
+    best_pic50 = chain[best_idx, 0]
+    
+    m1_best.plot(concs,responses,"o",color='orange',ms=10,label='Data',zorder=10)
+    plt.show(block=True)
+    sys.exit()
     
     saved_its, h = chain.shape
     
@@ -72,18 +101,12 @@ def do_plots(drug_channel):
         hills = np.ones(num_curves)
     elif args.model==2:
         pic50s, hills = chain[rand_idx, :2].T
+    
+    
+    
+    m2_best.set_title("$M_2, pIC50 = {}, Hill = {}$".format())
+    m2_mcmc.set_title("$M_2$ MCMC fits")
 
-    
-    
-    fig = plt.figure(figsize=(4,3.2))
-    ax = fig.add_subplot(111)
-    ax.set_xscale('log')
-    ax.grid()
-    ax.set_xlim(10**xmin,10**xmax)
-    ax.set_ylim(0,100)
-    ax.set_xlabel(r'{} concentration ($\mu$M)'.format(drug))
-    ax.set_ylabel(r'% {} block'.format(channel))
-    #ax.set_title("Inferred dose-response fits")
     for i in xrange(num_curves):
         ax.plot(x, dr.dose_response_model(x,hills[i],dr.pic50_to_ic50(pic50s[i])), color='black', alpha=0.02)
     for expt in experiment_numbers:
@@ -94,7 +117,7 @@ def do_plots(drug_channel):
     ax.legend(loc=2,fontsize=12)
     fig.tight_layout()
     print "\n{}\n".format(images_dir)
-    fig.savefig(images_dir+"{}_{}_nonh_model_{}_mcmc_prediction_curves.png".format(drug, channel, args.model))
+    fig.savefig(images_dir+"{}_{}_nonh_both_models_mcmc_prediction_curves.png".format(drug, channel, args.model))
     #fig.savefig(images_dir+"{}_{}_nonh_model_{}_mcmc_prediction_curves.pdf".format(drug, channel, args.model))
     plt.close()
     

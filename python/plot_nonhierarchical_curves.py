@@ -75,19 +75,19 @@ def do_plots(drug_channel):
     m1_best, m1_mcmc, m2_best, m2_mcmc = axs
     for ax in [m1_best, m2_best]:
         ax.set_ylabel(r'% {} block'.format(top_channel))
-        
-
     
     model = 1
     drug,channel,chain_file,images_dir = dr.nonhierarchical_chain_file_and_figs_dir(model, top_drug, top_channel, temperature)
     
     chain = np.loadtxt(chain_file)
     best_idx = np.argmax(chain[:,-1])
-    best_pic50 = chain[best_idx, 0]
+    best_pic50, best_sigma = chain[best_idx, [0,1]]
     
     m1_best.set_title("$M_1, pIC50 = {}, Hill = 1$".format(round(best_pic50,2)))    
     max_pd_curve = dr.dose_response_model(x, 1., dr.pic50_to_ic50(best_pic50))
     m1_best.plot(x, max_pd_curve, label='Max PD', lw=2, color='blue')
+    m1_best.plot(x, max_pd_curve + 1.96*best_sigma, , "r--", label='Max PD', lw=2)
+    m1_best.plot(x, max_pd_curve - 1.96*best_sigma, , "r--", label='Max PD', lw=2)
     m1_best.plot(concs,responses,"o",color='orange',ms=10,label='Data',zorder=10)
     m1_best.legend(loc=2)
     

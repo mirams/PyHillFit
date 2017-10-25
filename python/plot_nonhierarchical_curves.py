@@ -94,7 +94,12 @@ def do_plots(drug_channel):
     anyArtist = plt.Line2D((0,1),(0,0), color='k')
     
     handles, labels = ax1.get_legend_handles_labels()
-    ax1.legend(handles+[anyArtist], labels+["MCMC"], loc=2)
+    
+    if drug=="Quinine" and channel=="Nav1.5-late":
+        loc = 4
+    else:
+        loc = 2
+    ax1.legend(handles+[anyArtist], labels+["MCMC"], loc=loc)
     
     model = 2
     drug,channel,chain_file,images_dir = dr.nonhierarchical_chain_file_and_figs_dir(model, top_drug, top_channel, temperature)

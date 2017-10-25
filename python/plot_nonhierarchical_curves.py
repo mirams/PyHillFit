@@ -128,8 +128,8 @@ def do_plots(drug_channel):
 
 
     fig.tight_layout()
-    #plt.show(block=True)
-    #sys.exit()
+    plt.show(block=True)
+    sys.exit()
     
     
     print "\n{}\n".format(images_dir)

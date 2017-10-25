@@ -109,7 +109,7 @@ print "\nm2_hill_sds =", "["+",".join([str(i) for i in m2_hill_sds])+"]"
 print "\nbest_m2_pic50s =", "["+",".join([str(i) for i in best_m2_pic50s])+"]"
 print "\nm2_pic50_sds =", "["+",".join([str(i) for i in m2_pic50_sds])+"]"
 
-sys.exit()
+#sys.exit()
 
 fig = plt.figure(figsize=(4,3))
 #ax = fig.add_subplot(111, projection='3d')  # for newer matplotlib
@@ -125,8 +125,8 @@ ax.set_zlabel('Hill s.d.')
 ax.grid()
 ax.scatter(best_m2_hills, all_BFs, m2_hill_sds, zorder=10)
 #fig.tight_layout()
-fig.savefig("B12_vs_best_cmaes_M2_Hill_vs_posterior_sd.png")
-plt.show(block=True)
+#fig.savefig("B12_vs_best_cmaes_M2_Hill_vs_posterior_sd.png")
+#plt.show(block=True)
 
 """fig2 = plt.figure()#figsize=(4,3))
 ax2 = fig2.add_subplot(111)
@@ -157,6 +157,7 @@ print "\nAmbiguous B12s:"
 for q in abiguous_BFs:
     print q"""
 
+plt.close()
 model = 2
 temp = 1.0
 for d_c in abiguous_BFs:

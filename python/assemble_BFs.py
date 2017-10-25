@@ -165,5 +165,6 @@ for d_c in abiguous_BFs:
     drug, channel, chain_file, images_dir = dr.nonhierarchical_chain_file_and_figs_dir(model, d, c, temp)
     img = mpimg.imread(images_dir + "{}_{}_Hill_marginal.png".format(drug, channel))
     plt.imshow(img)
+    plt.title("{} + {}".format(drug, channel))
     plt.show(block=True)
 

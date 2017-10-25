@@ -34,7 +34,7 @@ dr.setup(args.data_file)
 # can select more than one of either
 drugs_to_run, channels_to_run = dr.list_drug_channel_options(args.all)
 
-num_curves = 1500
+num_curves = 750
 num_pts = 201
 
 
@@ -70,6 +70,7 @@ def do_plots(drug_channel):
     ax1.set_xlim(10**xmin,10**xmax)
     ax1.set_ylim(0,100)
     ax1.set_xlabel(r'{} concentration ($\mu$M)'.format(top_drug))
+    ax2.set_xlabel(r'{} concentration ($\mu$M)'.format(top_drug))
     ax1.set_ylabel(r'% {} block'.format(top_channel))
     
     model = 1
@@ -106,9 +107,9 @@ def do_plots(drug_channel):
     pic50s = chain[rand_idx, 0]
     hills = chain[rand_idx, 1]
     for i in xrange(num_curves):
-        ax2.plot(x, dr.dose_response_model(x, hills[i], dr.pic50_to_ic50(pic50s[i])), color='black', alpha=0.01)
+        ax2.plot(x, dr.dose_response_model(x, hills[i], dr.pic50_to_ic50(pic50s[i])), color='black', alpha=0.02)
     max_pd_curve = dr.dose_response_model(x, best_hill, dr.pic50_to_ic50(best_pic50))
-    ax2.plot(x, max_pd_curve, label='Max PD', lw=2, color='blue')
+    ax2.plot(x, max_pd_curve, label='Max PD', lw=1, color='blue')
     ax2.plot(concs,responses,"o",color='orange',ms=10,label='Data',zorder=10)
     ax2.legend(loc=2)
 

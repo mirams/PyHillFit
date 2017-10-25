@@ -86,11 +86,16 @@ def do_plots(drug_channel):
     best_pic50 = chain[best_idx, 0]
     
     m1_best.plot(concs,responses,"o",color='orange',ms=10,label='Data',zorder=10)
+
+    
+    m1_best.set_title("$M_1, pIC50 = {}, Hill = 1$".format(best_pic50))
+    m1_mcmc.set_title("$M_1$ MCMC fits")
+    
+    max_pd_curve = dr.dose_response_model(x, 1, dr.pic50_to_ic50(best_pic50))
+    m1_best.plot(x, max_pd_curve, label='Max PD', lw=2, color='blue')
+    
     plt.show(block=True)
     sys.exit()
-    
-    m1_best.set_title("$M_1, pIC50 = {}, Hill = 1$".format())
-    m1_mcmc.set_title("$M_1$ MCMC fits")
     
     saved_its, h = chain.shape
     

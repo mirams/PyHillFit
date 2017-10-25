@@ -98,7 +98,7 @@ print "max B21: {}, {} + {}".format(1./BFs[min_idx], dr.drugs[min_idx[0]], dr.ch
 
 print "B21 > B12 in {} cases".format(np.sum(BFs<1))
 
-print "\nmin best_m2_hill: {}".format(min(best_m2_hills))
+'''print "\nmin best_m2_hill: {}".format(min(best_m2_hills))
 print "\nmax best_m2_hill: {}".format(max(best_m2_hills))
 where_max_hill = np.unravel_index(np.argmax(best_m2_hills), (30,7))
 print "\nmax best_m2_hill from {} + {}".format(dr.drugs[where_max_hill[0]], dr.channels[where_max_hill[1]])
@@ -107,7 +107,7 @@ print "\nall_BFs =", "["+",".join([str(i) for i in all_BFs])+"]"
 print "\nbest_m2_hills =", "["+",".join([str(i) for i in best_m2_hills])+"]"
 print "\nm2_hill_sds =", "["+",".join([str(i) for i in m2_hill_sds])+"]"
 print "\nbest_m2_pic50s =", "["+",".join([str(i) for i in best_m2_pic50s])+"]"
-print "\nm2_pic50_sds =", "["+",".join([str(i) for i in m2_pic50_sds])+"]"
+print "\nm2_pic50_sds =", "["+",".join([str(i) for i in m2_pic50_sds])+"]"'''
 
 #sys.exit()
 

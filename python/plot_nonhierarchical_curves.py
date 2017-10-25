@@ -90,7 +90,11 @@ def do_plots(drug_channel):
     max_pd_curve = dr.dose_response_model(x, 1., dr.pic50_to_ic50(best_pic50))
     ax1.plot(x, max_pd_curve, label='Max PD', lw=1.5, color='blue')
     ax1.plot(concs,responses,"o",color='orange',ms=10,label='Data',zorder=10)
-    ax1.legend(loc=2)
+    
+    anyArtist = plt.Line2D((0,1),(0,0), color='k')
+    
+    handles, labels = ax1.get_legend_handles_labels()
+    ax1.legend(handles+[anyArtist], labels+["MCMC"], loc=2)
     
     model = 2
     drug,channel,chain_file,images_dir = dr.nonhierarchical_chain_file_and_figs_dir(model, top_drug, top_channel, temperature)
@@ -111,8 +115,9 @@ def do_plots(drug_channel):
     max_pd_curve = dr.dose_response_model(x, best_hill, dr.pic50_to_ic50(best_pic50))
     ax2.plot(x, max_pd_curve, label='Max PD', lw=1.5, color='blue')
     ax2.plot(concs,responses,"o",color='orange',ms=10,label='Data',zorder=10)
-    ax2.legend(loc=2)
-
+    
+    handles, labels = ax2.get_legend_handles_labels()
+    ax2.legend(handles+[anyArtist], labels+["MCMC"], loc=2)
 
 
     fig.tight_layout()

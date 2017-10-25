@@ -74,7 +74,7 @@ def do_plots(drug_channel):
     
     m1_best, m1_mcmc, m2_best, m2_mcmc = axs
     for ax in [m1_best, m2_best]:
-        ax.set_ylabel(r'% {} block'.format(channel))
+        ax.set_ylabel(r'% {} block'.format(top_channel))
         
     m1_best.set_title("$M_1, pIC50 = {}, Hill = 1$".format())
     m1_mcmc.set_title("$M_1$ MCMC fits")

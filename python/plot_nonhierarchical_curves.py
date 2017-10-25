@@ -79,7 +79,7 @@ def do_plots(drug_channel):
 
     
     model = 1
-    drug,channel,chain_file,images_dir = dr.nonhierarchical_chain_file_and_figs_dir(model, drug, channel, temperature)
+    drug,channel,chain_file,images_dir = dr.nonhierarchical_chain_file_and_figs_dir(model, top_drug, top_channel, temperature)
     
     chain = np.loadtxt(chain_file)
     best_idx = np.argmax(chain[:,-1])

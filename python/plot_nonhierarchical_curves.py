@@ -122,7 +122,7 @@ def do_plots(drug_channel):
     ax2.plot(concs,responses,"o",color='orange',ms=10,label='Data',zorder=10)
     
     handles, labels = ax2.get_legend_handles_labels()
-    ax2.legend(handles+[anyArtist], labels+["MCMC"], loc=2)
+    ax2.legend(handles+[anyArtist], labels+["MCMC"], loc=loc)
 
 
     fig.tight_layout()

@@ -111,7 +111,7 @@ print "\nm2_pic50_sds =", "["+",".join([str(i) for i in m2_pic50_sds])+"]"
 
 #sys.exit()
 
-fig = plt.figure(figsize=(4,3))
+"""fig = plt.figure(figsize=(4,3))
 #ax = fig.add_subplot(111, projection='3d')  # for newer matplotlib
 ax = Axes3D(fig)  # for older matplotlib
 ax.set_yscale('log')
@@ -126,7 +126,7 @@ ax.grid()
 ax.scatter(best_m2_hills, all_BFs, m2_hill_sds, zorder=10)
 #fig.tight_layout()
 #fig.savefig("B12_vs_best_cmaes_M2_Hill_vs_posterior_sd.png")
-#plt.show(block=True)
+#plt.show(block=True)"""
 
 """fig2 = plt.figure()#figsize=(4,3))
 ax2 = fig2.add_subplot(111)

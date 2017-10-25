@@ -70,7 +70,7 @@ def do_plots(drug_channel):
         ax.grid()
         ax.set_xlim(10**xmin,10**xmax)
         ax.set_ylim(0,100)
-        ax.set_xlabel(r'{} concentration ($\mu$M)'.format(drug))
+        ax.set_xlabel(r'{} concentration ($\mu$M)'.format(top_drug))
     
     m1_best, m1_mcmc, m2_best, m2_mcmc = axs
     for ax in [m1_best, m2_best]:

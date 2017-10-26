@@ -99,7 +99,7 @@ def do_plots(drug_channel):
         loc = 4
     else:
         loc = 2
-    ax1.legend(handles+[anyArtist], labels+["MCMC"], loc=loc)
+    ax1.legend(handles+[anyArtist], labels+["Samples"], loc=loc)
     
     model = 2
     drug,channel,chain_file,images_dir = dr.nonhierarchical_chain_file_and_figs_dir(model, top_drug, top_channel, temperature)
@@ -122,7 +122,7 @@ def do_plots(drug_channel):
     ax2.plot(concs,responses,"o",color='orange',ms=10,label='Data',zorder=10)
     
     handles, labels = ax2.get_legend_handles_labels()
-    ax2.legend(handles+[anyArtist], labels+["MCMC"], loc=loc)
+    ax2.legend(handles+[anyArtist], labels+["Samples"], loc=loc)
 
 
     fig.tight_layout()

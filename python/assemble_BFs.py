@@ -111,6 +111,8 @@ print "decisive_b12:", decisive_b12
 print "substantial_b21:", substantial_b21
 print "strong_b21:", strong_b21
 print "decisive_b21:", decisive_b21
+
+sys.exit()
     
 max_idx = np.unravel_index(np.argmax(BFs), (30,7))
 min_idx = np.unravel_index(np.argmin(BFs), (30,7))

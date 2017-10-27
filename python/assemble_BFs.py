@@ -38,6 +38,8 @@ m2_pic50_sds = []
 
 abiguous_BFs = []
 
+substantial_b12, substantial_b21, strong_b12, strong_b21, decisive_b12, decisive_b21 = 0, 0, 0, 0, 0, 0
+
 m2_chain_dir = "/home/rossj/arcus-b-py-output"
 def m2_chain_file(drug, channel):
     return m2_chain_dir + "{}_{}_model_2_temp_1.0_chain_nonhierarchical.txt".format(drug, channel)
@@ -87,8 +89,28 @@ for i, j in drugs_channels_idx:
         #print "M1 best fit: {}".format(best_params[0][(i,j)])
         #print "M2 best fit: {}".format(best_params[1][(i,j)])
         
+    if 3 < BFs[i, j] <= 10:
+        substantial_b12 += 1
+    elif 10 < BFs[i, j] <= 100:
+        strong_b12 += 1
+    elif 100 < BFs[i, j]:
+        decisive_b12 += 1
+    elif 3 < 1./BFs[i, j] <= 10:
+        substantial_b21 += 1
+    elif 10 < 1./BFs[i, j] <= 100:
+        strong_b21 += 1
+    elif 100 < 1./BFs[i, j]:
+        decisive_b21 += 1
+        
     all_BFs.append(BFs[i, j])
     #best_m2_hills.append(best_params[1][(i,j)][1])
+    
+print "substantial_b12:", substantial_b12
+print "strong_b12:", strong_b12
+print "decisive_b12:", decisive_b12
+print "substantial_b21:", substantial_b21
+print "strong_b21:", strong_b21
+print "decisive_b21:", decisive_b21
     
 max_idx = np.unravel_index(np.argmax(BFs), (30,7))
 min_idx = np.unravel_index(np.argmin(BFs), (30,7))

@@ -43,6 +43,8 @@ substantial_b12, substantial_b21, strong_b12, strong_b21, decisive_b12, decisive
 m2_chain_dir = "/home/rossj/arcus-b-py-output"
 def m2_chain_file(drug, channel):
     return m2_chain_dir + "{}_{}_model_2_temp_1.0_chain_nonhierarchical.txt".format(drug, channel)
+    
+no_evidence_count = 0
 
 for i, j in drugs_channels_idx:
 
@@ -101,9 +103,14 @@ for i, j in drugs_channels_idx:
         strong_b21 += 1
     elif 100 < 1./BFs[i, j]:
         decisive_b21 += 1
+    
+    if 1./3 < BFs[i, j] < 3.:
+        no_evidence_count += 1
         
     all_BFs.append(BFs[i, j])
     #best_m2_hills.append(best_params[1][(i,j)][1])
+    
+print "NO EVIDENCE:", no_evidence_count
     
 print "substantial_b12:", substantial_b12
 print "strong_b12:", strong_b12

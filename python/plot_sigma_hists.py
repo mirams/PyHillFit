@@ -31,7 +31,7 @@ def do_plots(drug_channel):
     ax1.set_xlabel(r'$\sigma$', fontsize=fs)
     ax2.set_xlabel(r'$\sigma$', fontsize=fs)
     ax1.set_title("Model 1")
-    ax1.set_title("Model 2")
+    ax2.set_title("Model 2")
     ax1.set_ylabel("Normalised frequency")
     
     model = 1

@@ -3,11 +3,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import argparse
 
-#test
-
-seed = 5
-npr.seed(seed)
-
 parser = argparse.ArgumentParser()
 
 requiredNamed = parser.add_argument_group('required arguments')

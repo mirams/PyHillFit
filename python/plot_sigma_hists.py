@@ -24,11 +24,12 @@ def do_plots(drug_channel):
     top_drug, top_channel = drug_channel
 
     
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(7,3), sharey=True, sharex=True)
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(6,3), sharey=True, sharex=True)
     ax1.grid()
     ax2.grid()
-    ax1.set_xlabel(r'$\sigma$')
-    ax2.set_xlabel(r'$\sigma$')
+    fs = 16
+    ax1.set_xlabel(r'$\sigma$', fontsize=fs)
+    ax2.set_xlabel(r'$\sigma$', fontsize=fs)
     ax1.set_ylabel("Normalised frequency")
     
     model = 1

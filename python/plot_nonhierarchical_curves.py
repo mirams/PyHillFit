@@ -90,7 +90,7 @@ def do_plots(drug_channel):
     for i in xrange(num_curves):
         ax1.plot(x, dr.dose_response_model(x, 1., dr.pic50_to_ic50(pic50s[i])), color='black', alpha=0.02)
     max_pd_curve = dr.dose_response_model(x, 1., dr.pic50_to_ic50(best_pic50))
-    ax1.plot(x, max_pd_curve, label='Max PD', lw=1.5, color='blue')
+    ax1.plot(x, max_pd_curve, label='Max PD', lw=1.5, color='red')
     ax1.plot(concs,responses,"o",color='orange',ms=10,label='Data',zorder=10)
     
     anyArtist = plt.Line2D((0,1),(0,0), color='k')
@@ -120,7 +120,7 @@ def do_plots(drug_channel):
     for i in xrange(num_curves):
         ax2.plot(x, dr.dose_response_model(x, hills[i], dr.pic50_to_ic50(pic50s[i])), color='black', alpha=0.02)
     max_pd_curve = dr.dose_response_model(x, best_hill, dr.pic50_to_ic50(best_pic50))
-    ax2.plot(x, max_pd_curve, label='Max PD', lw=1.5, color='blue')
+    ax2.plot(x, max_pd_curve, label='Max PD', lw=1.5, color='red')
     ax2.plot(concs,responses,"o",color='orange',ms=10,label='Data',zorder=10)
     
     handles, labels = ax2.get_legend_handles_labels()

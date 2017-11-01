@@ -7,11 +7,6 @@ parser = argparse.ArgumentParser()
 
 requiredNamed = parser.add_argument_group('required arguments')
 requiredNamed.add_argument("--data-file", type=str, help="csv file from which to read in data, in same format as provided crumb_data.csv", required=True)
-
-if len(sys.argv)==1:
-    parser.print_help()
-    sys.exit(1)
-
 args = parser.parse_args()
 
 temperature = 1.0

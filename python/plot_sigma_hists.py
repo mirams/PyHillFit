@@ -50,8 +50,6 @@ def do_plots(drug_channel):
     
     return None
 
-for drug_channel in it.product(drugs_to_run, channels_to_run):
-    print drug_channel
-    do_plots(drug_channel)
+do_plots(drugs_to_run+channels_to_run)
 
 

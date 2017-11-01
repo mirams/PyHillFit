@@ -1,12 +1,7 @@
 import doseresponse as dr
 import numpy as np
-import numpy.random as npr
-import matplotlib
-#matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import argparse
-import sys
-import itertools as it
 
 #test
 
@@ -31,7 +26,8 @@ dr.setup(args.data_file)
 
 # list drug and channel options, select from command line
 # can select more than one of either
-drugs_to_run, channels_to_run = dr.list_drug_channel_options(args.all)
+run_all = False
+drugs_to_run, channels_to_run = dr.list_drug_channel_options(run_all)
 
 
 def do_plots(drug_channel):
@@ -58,10 +54,8 @@ def do_plots(drug_channel):
     ax2.hist(sigmas, bins=40, normed=True, color='blue', edgecolor='blue')
 
     fig.tight_layout()
-    plt.show(block=True)
-    #sys.exit()
-    
     fig.savefig("{}_{}_nonh_both_models_sigma_hists.png".format(drug, channel))
+    plt.show(block=True)
     plt.close()
     
     return None

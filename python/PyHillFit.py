@@ -33,9 +33,7 @@ parser.add_argument('-ppp', '--plot-parameter-paths', action='store_true', help=
 parser.add_argument("-c", "--num-cores", type=int, help="number of cores to parallelise drug/channel combinations",default=1)
 parser.add_argument("-Ne", "--num_expts", type=int, help="how many experiments to fit to", default=0)
 parser.add_argument("--num-APs", type=int, help="how many (alpha,mu) samples to take for AP simulations", default=500)
-parser.add_argument("--single", action='store_true', help="run single-level MCMC algorithm",default=True)
 parser.add_argument("--hierarchical", action='store_true', help="run hierarchical MCMC algorithm",default=False)
-parser.add_argument("--fix-hill", action='store_true', help="fix Hill=1 through fitting and MCMC",default=False)
 parser.add_argument("-bfo", "--best-fit-only", action='store_true', help="only do CMA-ES best fit, then quit",default=False)
 
 requiredNamed = parser.add_argument_group('required arguments')

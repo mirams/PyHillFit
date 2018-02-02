@@ -952,6 +952,8 @@ if (args.num_cores<=1) or (len(drugs_to_run)==1):
     for drug_channel in drugs_channels:
         try:
             run(drug_channel)
+        except KeyboardInterrupt:
+            sys.exit("\nAborting everything\n")
         except:
             print "Failed to run", drug_channel
         # try/except is good when running multiple MCMCs and leaving them overnight,say

@@ -235,7 +235,7 @@ def run_hierarchical(drug_channel):
         while not es.stop():
             X = es.ask()
             es.tell(X, [sum_of_square_diffs(x,experiments[expt][:,0],experiments[expt][:,1]) for x in X])
-        res = es.result()
+        res = es.result
         best_fits.append((res[0][0]**2,res[0][1]**2-1,initial_sigma(len(experiments[expt][:,0]),res[1])))
 
     best_fits = np.array(best_fits)
@@ -297,7 +297,7 @@ def run_hierarchical(drug_channel):
     while not es.stop():
         X = es.ask()
         es.tell(X, [-np.product(st.fisk.pdf(best_fits[:,0],c=x[1],scale=x[0],loc=0)) for x in X])
-    res = es.result()
+    res = es.result
     
     alpha_cur, beta_cur = res[0]
     if alpha_cur <= locs[0]:
@@ -679,7 +679,7 @@ def run_single_level(drug_channel):
             #es.tell(X, [-dr.log_target(responses, where_r_0, where_r_100, where_r_other, concs, x**2 + [dr.pic50_exp_lower,dr.sigma_uniform_lower], temperature, pi_bit) for x in X])
             es.tell(X, [sum_of_square_diffs([x[0]**2+dr.pic50_exp_lower, 1.],concs,responses) for x in X])
             es.disp()
-        res = es.result()
+        res = es.result
         #pic50_cur, sigma_cur = res[0]**2 + [dr.pic50_exp_lower, dr.sigma_uniform_lower]
         pic50_cur = res[0][0]**2 + dr.pic50_exp_lower
         hill_cur = 1
@@ -692,7 +692,7 @@ def run_single_level(drug_channel):
             #es.tell(X, [-dr.log_target(responses, where_r_0, where_r_100, where_r_other, concs, x**2 + [dr.pic50_exp_lower, dr.hill_uniform_lower, dr.sigma_uniform_lower], temperature, pi_bit) for x in X])
             es.tell(X, [sum_of_square_diffs(x**2+[dr.pic50_exp_lower, dr.hill_uniform_lower],concs,responses) for x in X])
             es.disp()
-        res = es.result()
+        res = es.result
         #pic50_cur, hill_cur, sigma_cur = res[0]**2 + [dr.pic50_exp_lower, dr.hill_uniform_lower, dr.sigma_uniform_lower]
         pic50_cur, hill_cur = res[0]**2 + [dr.pic50_exp_lower, dr.hill_uniform_lower]
     

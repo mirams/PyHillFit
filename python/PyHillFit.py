@@ -639,6 +639,10 @@ def run_single_level(drug_channel):
         concs = np.concatenate((concs,experiments[i][:,0]))
         responses = np.concatenate((responses,experiments[i][:,1]))
         
+    if np.any(np.isnan(responses)):
+        print "Skipping {} because of empty responses / missing data".format(drug_channel)
+        return None
+        
     print experiments
     print concs
     print responses
@@ -936,7 +940,7 @@ def run_single_level(drug_channel):
 
 
     print "\n\n{} + {} complete!\n\n".format(drug,channel)
-    
+    return None
     
 if args.hierarchical:
     run = run_hierarchical
@@ -946,8 +950,10 @@ elif (not args.hierarchical): # assume single-level MCMC if hierarchical not spe
 drugs_channels = it.product(drugs_to_run,channels_to_run)
 if (args.num_cores<=1) or (len(drugs_to_run)==1):
     for drug_channel in drugs_channels:
-        run(drug_channel)
-        
+        try:
+            run(drug_channel)
+        except:
+            print "Failed to run", drug_channel
         # try/except is good when running multiple MCMCs and leaving them overnight,say
         # if one or more crash then the others will survive!
         # however, if you need more "control", comment out the try/except, and uncomment the other run(drug_channel) line

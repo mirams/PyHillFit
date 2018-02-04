@@ -117,14 +117,14 @@ def nonhierarchical_chain_file_and_figs_dir(model, drug, channel, temperature):
         drug = drug.replace('/','_')
     if ('/' in channel):
         channel = channel.replace('/','_')
-    output_dir = 'output/{}/nonhierarchical/{}/{}/model_{}/temperature_{}/'.format(dir_name, drug, channel, model, temperature)
+    output_dir = 'output/{}/single-level/{}/{}/model_{}/temperature_{}/'.format(dir_name, drug, channel, model, temperature)
     chain_dir = output_dir+'chain/'
     images_dir = output_dir+'figures/'
     dirs = [output_dir,chain_dir,images_dir]
     for directory in dirs:
         if not os.path.exists(directory):
             os.makedirs(directory)
-    chain_file = chain_dir+'{}_{}_model_{}_temp_{}_chain_nonhierarchical.txt'.format(drug, channel, model, temperature)
+    chain_file = chain_dir+'{}_{}_model_{}_temp_{}_chain_single-level.txt'.format(drug, channel, model, temperature)
     return drug,channel,chain_file,images_dir
     
 def alpha_mu_downsampling(drug,channel):
@@ -315,3 +315,17 @@ def log_gamma_prior(x,shape_param,scale_param,loc_params):
         sys.exit()
     else:
         return answer
+        
+
+def samples_file(drug, channel, model, hierarchical, num_samples, temperature):
+    if hierarchical:
+        output_dir = 'output/{}/hierarchical/{}/{}/model_{}/temperature_{}/'.format(dir_name, drug, channel, model, temperature)
+    else:
+        output_dir = 'output/{}/single-level/{}/{}/model_{}/temperature_{}/'.format(dir_name, drug, channel, model, temperature)
+    samples_dir = output_dir+'chain/{}_samples/'.format(num_samples)
+    if not os.path.exists(samples_dir):
+        os.makedirs(samples_dir)
+    samples_file = samples_dir+'{}_{}_model_{}_{}_samples.txt'.format(drug, channel, model, num_samples)
+    samples_png = samples_dir+'{}_{}_model_{}_{}_samples.png'.format(drug, channel, model, num_samples)
+    samples_pdf = samples_dir+'{}_{}_model_{}_{}_samples.pdf'.format(drug, channel, model, num_samples)
+    return samples_file, samples_png, samples_pdf

@@ -15,6 +15,7 @@ parser.add_argument("--hierarchical", action='store_true', help="take samples fr
 parser.add_argument("-m", "--model", type=int, help="For non-hierarchical: 1. fix Hill=1; 2. vary Hill", required=True)
 parser.add_argument("--all", action='store_true', help='run hierarchical MCMC on all drugs and channels', default=False)
 parser.add_argument("--plot-data", action='store_true', help='plot data points on top of predicted curves', default=False)
+parser.add_argument("--save-pdf", action='store_true', help='save dose-response curves figure as pdf (in addition to png), but the file will probably be massive', default=False)
 args = parser.parse_args()
 
 dr.define_model(args.model)
@@ -75,5 +76,9 @@ for drug, channel in it.product(drugs_to_run, channels_to_run):
     fig.tight_layout()
     fig.savefig(samples_png)
     print "\nSaved {}\n".format(samples_png)
+    if args.save_pdf:
+        fig.savefig(samples_pdf)
+        print "\nSaved {}\n".format(samples_pdf)
+        
     plt.close()
 

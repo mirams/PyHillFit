@@ -58,7 +58,9 @@ for drug, channel in it.product(drugs_to_run, channels_to_run):
     samples_file, samples_png, samples_pdf = dr.samples_file(drug, channel, args.model, args.hierarchical, args.num_samples, temperature)
     
     # could technically save 50% of the space for Model 1 by not bothering to save Hill=1 in every sample...
-    np.savetxt(samples_file, chain)
+    with open(samples_file, "w") as outfile:
+        outfile.write("# {} (pIC50,Hill) samples from single-level MCMC (model {}) for {} + {}\n".format(args.num_samples, args.model, drug, channel))
+        np.savetxt(outfile, chain)
     
     fig, ax = plt.subplots(1, 1, figsize=(5,4))
     ax.grid()

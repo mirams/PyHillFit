@@ -57,8 +57,11 @@ for drug, channel in it.product(drugs_to_run, channels_to_run):
     
     samples_file, samples_png, samples_pdf = dr.samples_file(drug, channel, args.model, args.hierarchical, args.num_samples, temperature)
     
+    # just save all 2000-sample files in the same directory
+    all_samples_file = dr.all_samples_file(args.hierarchical, args.model, args.num_samples, drug, channel)
+    
     # could technically save 50% of the space for Model 1 by not bothering to save Hill=1 in every sample...
-    with open(samples_file, "w") as outfile:
+    with open(all_samples_file, "w") as outfile:
         outfile.write("# {} (pIC50,Hill) samples from single-level MCMC (model {}) for {} + {}\n".format(args.num_samples, args.model, drug, channel))
         np.savetxt(outfile, chain)
     

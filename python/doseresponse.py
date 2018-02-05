@@ -319,7 +319,7 @@ def log_gamma_prior(x,shape_param,scale_param,loc_params):
 
 def samples_file(drug, channel, model, hierarchical, num_samples, temperature):
     if hierarchical:
-        output_dir = 'output/{}/hierarchical/{}/{}/model_{}/temperature_{}/'.format(dir_name, drug, channel, model, temperature)
+        output_dir = 'output/{}/hierarchical/{}/{}/temperature_{}/'.format(dir_name, drug, channel, temperature)
     else:
         output_dir = 'output/{}/single-level/{}/{}/model_{}/temperature_{}/'.format(dir_name, drug, channel, model, temperature)
     samples_dir = output_dir+'chain/{}_samples/'.format(num_samples)
@@ -329,3 +329,16 @@ def samples_file(drug, channel, model, hierarchical, num_samples, temperature):
     samples_png = samples_dir+'{}_{}_model_{}_{}_samples.png'.format(drug, channel, model, num_samples)
     samples_pdf = samples_dir+'{}_{}_model_{}_{}_samples.pdf'.format(drug, channel, model, num_samples)
     return samples_file, samples_png, samples_pdf
+
+
+def all_samples_file(hierarchical, model, num_samples, drug, channel):
+    if hierarchical:
+        output_dir = 'output/{}/all_samples/hierarchical/'.format(dir_name)
+        output_file = output_dir + "{}_{}_hierarchical_{}_samples.txt".format(drug, channel, num_samples)
+    else:
+        output_dir = 'output/{}/all_samples/single-level/model_{}/{}_samples/'.format(dir_name, model, num_samples)
+        output_file = output_dir+'{}_{}_single-level_model_{}_{}_samples.txt'.format(drug, channel, model, num_samples)
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    return output_file
+

@@ -30,7 +30,11 @@ alpha = 0.002  # this is the lowest value I've found that actually shows anythin
 
 for drug, channel in it.product(drugs_to_run, channels_to_run):
 
-    num_expts, experiment_numbers, experiments = dr.load_crumb_data(drug,channel)
+    try:
+        num_expts, experiment_numbers, experiments = dr.load_crumb_data(drug,channel)
+    except:
+        print "\nCan't load experimental data for {} + {} --- skipping\n".format(drug, channel)
+        continue
     drug, channel, chain_file, images_dir = dr.nonhierarchical_chain_file_and_figs_dir(args.model, drug, channel, temperature)
     
     concs = np.array([])

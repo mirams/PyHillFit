@@ -57,6 +57,12 @@ dr.setup(args.data_file)
 # can select more than one of either
 drugs_to_run, channels_to_run = dr.list_drug_channel_options(args.all)
 
+"""if dr.dir_name == "PyHillFit_input_file":
+    print "Removing hERG from list of channels to run"
+    try:
+        channels_to_run.remove("hERG")
+    except:
+        pass"""
 
 # log-likelihood (same as log-target for uniform priors) for single-level MCMC
 def log_likelihood_single_vary_hill(measurements,doses,theta):
@@ -628,9 +634,16 @@ def run_single_level(drug_channel):
 
     drug, channel = drug_channel
     
+    print "\n\n{} + {}\n\n".format(drug,channel)
+    
     seed = 100
 
-    num_expts, experiment_numbers, experiments = dr.load_crumb_data(drug,channel)
+    try:
+        num_expts, experiment_numbers, experiments = dr.load_crumb_data(drug,channel)
+    except:
+        print "Problem loading data, guessing there are no entries for {} + {} --- skipping".format(drug, channel)
+        return None
+    
     drug,channel,chain_file,images_dir = dr.nonhierarchical_chain_file_and_figs_dir(args.model, drug, channel, temperature)
     
     concs = np.array([])
@@ -643,17 +656,17 @@ def run_single_level(drug_channel):
         print "Skipping {} because of empty responses / missing data".format(drug_channel)
         return None
         
-    print experiments
-    print concs
-    print responses
+    #print experiments
+    #print concs
+    #print responses
     
     where_r_0 = responses==0
     where_r_100 = responses==100
     where_r_other = (0<responses) & (responses<100)
     
-    print "where_r_0:", where_r_0
-    print "where_r_100:", where_r_100
-    print "where_r_other:", where_r_other
+    #print "where_r_0:", where_r_0
+    #print "where_r_100:", where_r_100
+    #print "where_r_other:", where_r_other
     
     pi_bit = dr.compute_pi_bit_of_log_likelihood(where_r_other)
     
@@ -702,14 +715,14 @@ def run_single_level(drug_channel):
     
 
     sigma_cur = initial_sigma(len(responses),res[1])
-    print "sigma_cur:", sigma_cur
+    #print "sigma_cur:", sigma_cur
     
     if args.model==1:
         theta_cur = np.array([pic50_cur,sigma_cur])
     elif args.model==2:
         theta_cur = np.array([pic50_cur,hill_cur,sigma_cur])
         
-    print "theta_cur:", theta_cur
+    #print "theta_cur:", theta_cur
     
     best_params_file = images_dir+"{}_{}_best_fit_params.txt".format(drug, channel)
     with open(best_params_file, "w") as outfile:
@@ -726,7 +739,7 @@ def run_single_level(drug_channel):
     cov_estimate = proposal_scale*np.diag(np.copy(np.abs(theta_cur)))
     
     cmaes_ll = dr.log_target(responses, where_r_0, where_r_100, where_r_other, concs, theta_cur, temperature, pi_bit)
-    print "cmaes_ll:", cmaes_ll
+    #print "cmaes_ll:", cmaes_ll
         
     best_fit_fig = plt.figure(figsize=(5,4))
     best_fit_ax = best_fit_fig.add_subplot(111)
@@ -760,7 +773,7 @@ def run_single_level(drug_channel):
 
     log_target_cur = dr.log_target(responses, where_r_0, where_r_100, where_r_other, concs, theta_cur, temperature, pi_bit)
     
-    print "initial log_target_cur =", log_target_cur
+    #print "initial log_target_cur =", log_target_cur
 
 
 
@@ -784,11 +797,11 @@ def run_single_level(drug_channel):
     chain = np.zeros((saved_iterations,num_params+1))
 
     chain[0,:] = np.concatenate((np.copy(theta_cur),[log_target_cur]))
-    print chain[0]
+    #print chain[0]
 
 
-    print "concs:", concs
-    print "responses:", responses
+    #print "concs:", concs
+    #print "responses:", responses
     
     
     
@@ -819,16 +832,16 @@ def run_single_level(drug_channel):
         if (t%thinning==0):
             chain[t/thinning,:] = np.concatenate((np.copy(theta_cur),[log_target_cur]))
         if (t%status_when==0):
-            print "{} / {}".format(t/status_when,total_iterations/status_when)
+            #print "{} / {}".format(t/status_when,total_iterations/status_when)
             time_taken_so_far = time.time()-start
             estimated_time_left = time_taken_so_far/t*(total_iterations-t)
-            print "Time taken: {} s = {} min".format(np.round(time_taken_so_far,1),np.round(time_taken_so_far/60,2))
-            print "acceptance = {}".format(np.round(acceptance,5))
-            print "Estimated time remaining: {} s = {} min".format(np.round(estimated_time_left,1),np.round(estimated_time_left/60,2))
+            #print "Time taken: {} s = {} min".format(np.round(time_taken_so_far,1),np.round(time_taken_so_far/60,2))
+            #print "acceptance = {}".format(np.round(acceptance,5))
+            #print "Estimated time remaining: {} s = {} min".format(np.round(estimated_time_left,1),np.round(estimated_time_left/60,2))
         t += 1
 
-    print "\nTime taken to do {} MCMC iterations: {} s\n".format(total_iterations, time.time()-start)
-    print "Final iteration:", chain[-1,:], "\n"
+    #print "\nTime taken to do {} MCMC iterations: {} s\n".format(total_iterations, time.time()-start)
+    #print "Final iteration:", chain[-1,:], "\n"
     
     burn_fraction = args.burn_in_fraction
     burn = saved_iterations/burn_fraction
@@ -841,7 +854,7 @@ def run_single_level(drug_channel):
 
     best_ll_index = np.argmax(chain[:,num_params])
     best_ll_row = chain[best_ll_index,:]
-    print "Best log-likelihood:", "\n", best_ll_row
+    #print "Best log-likelihood:", "\n", best_ll_row
 
     figs = []
     axs = []

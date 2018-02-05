@@ -333,12 +333,17 @@ def samples_file(drug, channel, model, hierarchical, num_samples, temperature):
 
 def all_samples_file(hierarchical, model, num_samples, drug, channel):
     if hierarchical:
-        output_dir = 'output/{}/all_samples/hierarchical/'.format(dir_name)
-        output_file = output_dir + "{}_{}_hierarchical_{}_samples.txt".format(drug, channel, num_samples)
+        txt_dir = 'output/{}/all_samples/hierarchical/txt/'.format(dir_name)
+        png_dir = 'output/{}/all_samples/hierarchical/png/'.format(dir_name)
+        txt_file = txt_dir + "{}_{}_hierarchical_{}_samples.txt".format(drug, channel, num_samples)
+        png_file = png_dir + "{}_{}_hierarchical_{}_samples.png".format(drug, channel, num_samples)
     else:
-        output_dir = 'output/{}/all_samples/single-level/model_{}/{}_samples/'.format(dir_name, model, num_samples)
-        output_file = output_dir+'{}_{}_single-level_model_{}_{}_samples.txt'.format(drug, channel, model, num_samples)
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-    return output_file
+        txt_dir = 'output/{}/all_samples/single-level/model_{}/{}_samples/txt/'.format(dir_name, model, num_samples)
+        png_dir = 'output/{}/all_samples/single-level/model_{}/{}_samples/png/'.format(dir_name, model, num_samples)
+        txt_file = txt_dir+'{}_{}_single-level_model_{}_{}_samples.txt'.format(drug, channel, model, num_samples)
+        png_file = png_dir+'{}_{}_single-level_model_{}_{}_samples.png'.format(drug, channel, model, num_samples)
+    for f in [txt_dir, png_dir]:
+        if not os.path.exists(f):
+            os.makedirs(f)
+    return txt_file, png_file
 

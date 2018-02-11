@@ -78,14 +78,13 @@ def run(drug_channel):
     
     for i, conc in enumerate(args.concs):
         ax1.axvline(conc,color=colors[3+i],lw=2,label=r"{} $\mu$M".format(conc),alpha=0.8)
-    for i in xrange(num_samples):
+    for i in xrange(args.num_samples):
         ax1.plot(concs,dr.dose_response_model(concs,hill_samples[i],dr.pic50_to_ic50(pic50_samples[i])),color='black',alpha=0.01)
     ax1.legend(loc=2,fontsize=10)
     
     plt.show()
     sys.exit()
     
-    args.num_hist_samples = 100000
     
     unif_hill_samples = npr.rand(args.num_hist_samples)
     unif_pic50_samples = npr.rand(args.num_hist_samples)

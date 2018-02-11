@@ -24,7 +24,7 @@ parser.add_argument("-Ne", "--num-expts", type=int, help="how many experiments t
 parser.add_argument("--data-file", type=str, help="csv file from which to read in data, in same format as provided crumb_data.csv")
 parser.add_argument("--fix-hill", action='store_true', help="fix Hill=1 through fitting and MCMC",default=False)
 parser.add_argument("-T", "--num-samples", type=int, help="number of samples to plot", required=True)
-parser.add_argument("-H", "--num--hist-samples", type=int, help="number of samples for histogram --- should be much higher, really", required=True)
+parser.add_argument("-H", "--num-hist-samples", type=int, help="number of samples for histogram --- should be much higher, really", required=True)
 args = parser.parse_args()
 
 dr.setup(args.data_file)

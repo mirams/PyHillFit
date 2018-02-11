@@ -48,10 +48,10 @@ def run(drug_channel):
     end = chain.shape[0]
     burn = end/4
     
-    pic50_samples = np.zeros(args.num_samples)
-    hill_samples = np.zeros(args.num_samples)
-    rand_idx = npr.randint(burn, end, args.num_samples)
-    for t in xrange(args.num_samples):
+    pic50_samples = np.zeros(args.num_hist_samples)
+    hill_samples = np.zeros(args.num_hist_samples)
+    rand_idx = npr.randint(burn, end, args.num_hist_samples)    
+    for t in xrange(args.num_hist_samples):
         alpha, beta, mu, s = chain[rand_idx[t], :4]
         hill_samples[t] = st.fisk.rvs(c=beta, scale=alpha, loc=0)
         pic50_samples[t] = st.logistic.rvs(mu, s)
@@ -78,19 +78,12 @@ def run(drug_channel):
     
     for i, conc in enumerate(args.concs):
         ax1.axvline(conc,color=colors[3+i],lw=2,label=r"{} $\mu$M".format(conc),alpha=0.8)
+        
+    subset_idx = npr.randint(0, args.num_hist_samples, args.num_samples)
     for i in xrange(args.num_samples):
-        ax1.plot(concs,dr.dose_response_model(concs,hill_samples[i],dr.pic50_to_ic50(pic50_samples[i])),color='black',alpha=0.01)
+        ax1.plot(concs,dr.dose_response_model(concs, hill_samples[i], dr.pic50_to_ic50(pic50_samples[i])),color='black', alpha=0.1)
     ax1.legend(loc=2,fontsize=10)
     
-    plt.show()
-    sys.exit()
-    
-    
-    unif_hill_samples = npr.rand(args.num_hist_samples)
-    unif_pic50_samples = npr.rand(args.num_hist_samples)
-    
-    hill_samples = np.interp(unif_hill_samples, hill_cdf[:,1], hill_cdf[:,0])
-    pic50_samples = np.interp(unif_pic50_samples, pic50_cdf[:,1], pic50_cdf[:,0])
     
     ax2 = fig.add_subplot(234)
     ax2.set_xlim(0,100)
@@ -102,6 +95,9 @@ def run(drug_channel):
     
     ax2.set_title('D. Hierarchical predicted\nfuture experiments')
     ax2.legend(loc=2,fontsize=10)
+    
+    plt.show()
+    sys.exit()
         
     ax3 = fig.add_subplot(232,sharey=ax1)
     ax3.grid()

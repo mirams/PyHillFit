@@ -24,6 +24,7 @@ parser.add_argument("-Ne", "--num-expts", type=int, help="how many experiments t
 parser.add_argument("--data-file", type=str, help="csv file from which to read in data, in same format as provided crumb_data.csv")
 parser.add_argument("--fix-hill", action='store_true', help="fix Hill=1 through fitting and MCMC",default=False)
 parser.add_argument("-T", "--num-samples", type=int, help="number of samples to plot", required=True)
+parser.add_argument("-H", "--num--hist-samples", type=int, help="number of samples for histogram --- should be much higher, really", required=True)
 args = parser.parse_args()
 
 dr.setup(args.data_file)
@@ -54,23 +55,6 @@ def run(drug_channel):
         alpha, beta, mu, s = chain[rand_idx[t], :4]
         hill_samples[t] = st.fisk.rvs(c=beta, scale=alpha, loc=0)
         pic50_samples[t] = st.logistic.rvs(mu, s)
-    print pic50_samples
-    print hill_samples
-    sys.exit()
-    
-    hill_cdf_file, pic50_cdf_file = dr.hierarchical_posterior_predictive_cdf_files(drug,channel,num_expts)
-    
-    hill_cdf = np.loadtxt(hill_cdf_file)
-    pic50_cdf = np.loadtxt(pic50_cdf_file)
-    
-    num_samples = 2000
-    
-    unif_hill_samples = npr.rand(num_samples)
-    unif_pic50_samples = npr.rand(num_samples)
-    
-    hill_samples = np.interp(unif_hill_samples, hill_cdf[:,1], hill_cdf[:,0])
-    pic50_samples = np.interp(unif_pic50_samples, pic50_cdf[:,1], pic50_cdf[:,0])
-    
     
     
     
@@ -98,10 +82,13 @@ def run(drug_channel):
         ax1.plot(concs,dr.dose_response_model(concs,hill_samples[i],dr.pic50_to_ic50(pic50_samples[i])),color='black',alpha=0.01)
     ax1.legend(loc=2,fontsize=10)
     
-    num_hist_samples = 100000
+    plt.show()
+    sys.exit()
     
-    unif_hill_samples = npr.rand(num_hist_samples)
-    unif_pic50_samples = npr.rand(num_hist_samples)
+    args.num_hist_samples = 100000
+    
+    unif_hill_samples = npr.rand(args.num_hist_samples)
+    unif_pic50_samples = npr.rand(args.num_hist_samples)
     
     hill_samples = np.interp(unif_hill_samples, hill_cdf[:,1], hill_cdf[:,0])
     pic50_samples = np.interp(unif_pic50_samples, pic50_cdf[:,1], pic50_cdf[:,0])
@@ -147,8 +134,8 @@ def run(drug_channel):
     ax4.set_xlabel(r'% {} block'.format(channel))
     ax4.grid()
     
-    num_hist_samples = 100000
-    hist_indices = npr.randint(burn,end,num_hist_samples)
+    args.num_hist_samples = 100000
+    hist_indices = npr.randint(burn,end,args.num_hist_samples)
     alphas = chain[hist_indices,0]
     mus = chain[hist_indices,2]
     
@@ -198,8 +185,8 @@ def run(drug_channel):
         ax5.plot(concs,dr.dose_response_model(concs,samples[i,0],dr.pic50_to_ic50(samples[i,1])),color='black',alpha=0.01)
     ax5.legend(loc=2,fontsize=10)
     
-    num_hist_samples = 50000
-    sample_indices = npr.randint(burn,end,num_hist_samples)
+    args.num_hist_samples = 50000
+    sample_indices = npr.randint(burn,end,args.num_hist_samples)
     samples = chain[sample_indices,:]
     ax6 = fig.add_subplot(236,sharey=ax2)
     ax6.set_xlim(0,100)

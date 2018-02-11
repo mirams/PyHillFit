@@ -80,8 +80,8 @@ def run(drug_channel):
         ax1.axvline(conc,color=colors[3+i],lw=2,label=r"{} $\mu$M".format(conc),alpha=0.8)
         
     subset_idx = npr.randint(0, args.num_hist_samples, args.num_samples)
-    for i in xrange(args.num_samples):
-        ax1.plot(concs,dr.dose_response_model(concs, hill_samples[i], dr.pic50_to_ic50(pic50_samples[i])),color='black', alpha=0.1)
+    for i in xrange(args.num_samples):  # only plot the first T of the H samples (should be fine because they're all randomly selected)
+        ax1.plot(concs,dr.dose_response_model(concs, hill_samples[i], dr.pic50_to_ic50(pic50_samples[i])),color='black', alpha=0.01)
     ax1.legend(loc=2,fontsize=10)
     
     

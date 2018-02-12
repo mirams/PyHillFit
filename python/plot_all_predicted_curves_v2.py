@@ -112,12 +112,11 @@ def run(drug_channel):
     
 
     
-    num_samples = 1000
-    alpha_indices = npr.randint(burn,end,num_samples)
-    alpha_samples = chain[alpha_indices,0]
-    mu_samples = chain[alpha_indices,2]
+    alpha_indices = npr.randint(burn, end, args.num_samples)
+    alpha_samples = chain[alpha_indices, 0]
+    mu_samples = chain[alpha_indices, 2]
     for i, conc in enumerate(args.concs):
-        ax3.axvline(conc,color=colors[3+i],lw=2,label=r"{} $\mu$M".format(conc),alpha=0.8)
+        ax3.axvline(conc, color=colors[3+i], lw=2, label=r"{} $\mu$M".format(conc), alpha=0.8)
     for i in xrange(num_samples):
         ax3.plot(concs,dr.dose_response_model(concs,alpha_samples[i],dr.pic50_to_ic50(mu_samples[i])),color='black',alpha=0.01)
     ax3.legend(loc=2,fontsize=10)
@@ -126,7 +125,6 @@ def run(drug_channel):
     ax4.set_xlabel(r'% {} block'.format(channel))
     ax4.grid()
     
-    args.num_hist_samples = 100000
     hist_indices = npr.randint(burn,end,args.num_hist_samples)
     alphas = chain[hist_indices,0]
     mus = chain[hist_indices,2]
@@ -152,12 +150,11 @@ def run(drug_channel):
     end = chain.shape[0]
     burn = end/4
 
-    num_samples = 1000
-    sample_indices = npr.randint(burn,end,num_samples)
-    samples = chain[sample_indices,:]
+    sample_indices = npr.randint(burn, end, args.num_samples)
+    samples = chain[sample_indices, :]
     
     
-    ax5 = fig.add_subplot(233,sharey=ax1)
+    ax5 = fig.add_subplot(233, sharey=ax1)
     ax5.grid()
     plt.setp(ax5.get_yticklabels(), visible=False)
     xmin = -4
@@ -178,14 +175,13 @@ def run(drug_channel):
     
     for i, conc in enumerate(args.concs):
         ax5.axvline(conc,color=colors[3+i],alpha=0.8,lw=2,label=r"{} $\mu$M".format(conc))
-    for i in xrange(num_samples):
+    for i in xrange(args.num_samples):
         ax5.plot(concs,dr.dose_response_model(concs,samples[i,0],dr.pic50_to_ic50(samples[i,1])),color='black',alpha=0.01)
     ax5.legend(loc=2,fontsize=10)
     
-    args.num_hist_samples = 50000
-    sample_indices = npr.randint(burn,end,args.num_hist_samples)
+    sample_indices = npr.randint(burn,end, args.num_hist_samples)
     samples = chain[sample_indices,:]
-    ax6 = fig.add_subplot(236,sharey=ax2)
+    ax6 = fig.add_subplot(236, sharey=ax2)
     ax6.set_xlim(0,100)
     ax6.set_xlabel(r'% {} block'.format(channel))
     plt.setp(ax6.get_yticklabels(), visible=False)

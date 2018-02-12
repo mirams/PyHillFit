@@ -169,8 +169,8 @@ def log_target_distribution(experiments,theta,shapes,scales,locs):
     if np.any(theta[:4] <= locs[:4]):
         return -np.inf
     alpha,beta,mu,s = theta[:4]
-    hill_is = theta[4:-1:2]
-    pic50_is = theta[5:-1:2]
+    pic50_is = theta[4:-1:2]
+    hill_is = theta[5:-1:2]
     sigma = theta[-1]
     if np.any(hill_is<0) or np.any(pic50_is<pic50_prior[0]) or (sigma<=locs[-1]): # these are just checking if in support of prior, roughly
         return -np.inf
@@ -205,7 +205,10 @@ def logistic_variance(mu,s): # from Wikipedia
 # hierarchical MCMC
 def run_hierarchical(drug_channel):
     global pic50_prior
-    pic50_prior = [-2]  # bad way to deal with sum_of_square_diffs in hierarchical case
+    pic50_prior = [-2.]  # bad way to deal with sum_of_square_diffs in hierarchical case
+    
+    global pic50_hill_lowers
+    pic50_hill_priors_lowers = np.array([-2., 0.])
 
     drug, channel = drug_channel
     
@@ -233,16 +236,16 @@ def run_hierarchical(drug_channel):
     best_fits = []
     for expt in experiment_numbers:
         start = time.time()
-        x0 = np.array([1.,2.5]) # not fitting sigma by CMA-ES
+        x0 = np.array([2.5, 1.]) # (pIC50,Hill) not fitting sigma by CMA-ES
         sigma0 = 0.1
         opts = cma.CMAOptions()
         opts['seed'] = expt
         es = cma.CMAEvolutionStrategy(x0, sigma0, opts)
         while not es.stop():
             X = es.ask()
-            es.tell(X, [sum_of_square_diffs(x,experiments[expt][:,0],experiments[expt][:,1]) for x in X])
+            es.tell(X, [sum_of_square_diffs(x**2+pic50_hill_priors_lowers,experiments[expt][:,0],experiments[expt][:,1]) for x in X])
         res = es.result
-        best_fits.append((res[0][0]**2, res[0][1]**2-1, initial_sigma(len(experiments[expt][:,0]),res[1])))
+        best_fits.append((res[0]**2+pic50_hill_priors_lowers, initial_sigma(len(experiments[expt][:,0]),res[1])))
 
     best_fits = np.array(best_fits)
 
@@ -271,7 +274,7 @@ def run_hierarchical(drug_channel):
         
     if (not skip_best_fits_plot):
         for expt in experiment_numbers:
-            ax.plot(x,dr.dose_response_model(x,best_fits[expt,0],dr.pic50_to_ic50(best_fits[expt,1])),color=colors[expt],lw=2)
+            ax.plot(x, dr.dose_response_model(x, best_fits[expt,1], dr.pic50_to_ic50(best_fits[expt,0])),color=colors[expt],lw=2)
             ax.scatter(experiments[expt][:,0],experiments[expt][:,1],label='Expt {}'.format(expt+1),color=colors[expt],s=100)
         ax.set_ylim(0,100)
         ax.set_xlim(min(x),max(x))
@@ -279,7 +282,7 @@ def run_hierarchical(drug_channel):
         ax.set_ylabel('% {} block'.format(channel))
         ax.legend(loc=2)
         ax.grid()
-        ax.set_title('Hills = {}\nIC50s = {}'.format([round(best_fits[expt,0],2) for expt in experiment_numbers],[round(dr.pic50_to_ic50(best_fits[expt,1]),2) for expt in experiment_numbers]))
+        ax.set_title('Hills = {}\nIC50s = {}'.format([round(best_fits[expt,1],1) for expt in experiment_numbers],[round(dr.pic50_to_ic50(best_fits[expt,0]),1) for expt in experiment_numbers]))
         fig.tight_layout()
         fig.savefig(figs_dir+'{}_{}_cma-es_best_fits.png'.format(drug,channel))
         fig.savefig(figs_dir+'{}_{}_cma-es_best_fits.pdf'.format(drug,channel))

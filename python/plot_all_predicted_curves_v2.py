@@ -188,7 +188,7 @@ def run(drug_channel):
     plt.setp(ax6.get_yticklabels(), visible=False)
     ax6.grid()
     for i, conc in enumerate(args.concs):
-        ax6.hist(dr.dose_response_model(conc,samples[:,0],dr.pic50_to_ic50(samples[:,1])),bins=50,normed=True,alpha=0.8,color=colors[3+i],edgecolor='none',label=r"{} $\mu$M {}".format(conc,drug))
+        ax6.hist(dr.dose_response_model(conc, samples[:,1], dr.pic50_to_ic50(samples[:,0])),bins=50,normed=True,alpha=0.8,color=colors[3+i],edgecolor='none',label=r"{} $\mu$M {}".format(conc,drug))
     ax6.set_title('F. Single-level inferred\neffects')
 
     ax2.legend(loc=2,fontsize=10)

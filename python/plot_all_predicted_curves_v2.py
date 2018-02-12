@@ -57,7 +57,7 @@ def run(drug_channel):
         pic50_samples[t] = st.logistic.rvs(mu, s)
     
     
-    
+    num_pts = 50
     fig = plt.figure(figsize=(11,7))
     
     
@@ -65,7 +65,7 @@ def run(drug_channel):
     ax1.grid()
     xmin = -4
     xmax = 3
-    concs = np.logspace(xmin,xmax,101)
+    concs = np.logspace(xmin,xmax,num_pts)
     ax1.set_xscale('log')
     ax1.set_ylim(0,100)
     ax1.set_xlabel(r'{} concentration ($\mu$M)'.format(drug))
@@ -100,7 +100,7 @@ def run(drug_channel):
     ax3.grid()
     xmin = -4
     xmax = 3
-    concs = np.logspace(xmin,xmax,101)
+    concs = np.logspace(xmin,xmax,num_pts)
     ax3.set_xscale('log')
     ax3.set_ylim(0,100)
     ax3.set_xlabel(r'{} concentration ($\mu$M)'.format(drug))
@@ -159,7 +159,7 @@ def run(drug_channel):
     plt.setp(ax5.get_yticklabels(), visible=False)
     xmin = -4
     xmax = 4
-    concs = np.logspace(xmin,xmax,101)
+    concs = np.logspace(xmin,xmax,num_pts)
     ax5.set_xscale('log')
     ax5.set_ylim(0,100)
     ax5.set_xlim(10**xmin,10**xmax)

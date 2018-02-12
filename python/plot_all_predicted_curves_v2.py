@@ -117,7 +117,7 @@ def run(drug_channel):
     mu_samples = chain[alpha_indices, 2]
     for i, conc in enumerate(args.concs):
         ax3.axvline(conc, color=colors[3+i], lw=2, label=r"{} $\mu$M".format(conc), alpha=0.8)
-    for i in xrange(num_samples):
+    for i in xrange(args.num_samples):
         ax3.plot(concs,dr.dose_response_model(concs,alpha_samples[i],dr.pic50_to_ic50(mu_samples[i])),color='black',alpha=0.01)
     ax3.legend(loc=2,fontsize=10)
     ax4 = fig.add_subplot(235,sharey=ax2)

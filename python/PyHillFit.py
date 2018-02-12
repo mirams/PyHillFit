@@ -307,10 +307,10 @@ def run_hierarchical(drug_channel):
     es = cma.CMAEvolutionStrategy(x0, sigma0, opts)
     while not es.stop():
         X = es.ask()
-        es.tell(X, [-np.product(st.fisk.pdf(best_fits[:,0],c=x[1],scale=x[0],loc=0)) for x in X])
+        es.tell(X, [-np.product(st.fisk.pdf(best_fits[:,1],c=x[1],scale=x[0],loc=0)) for x in X])
     res = es.result
     
-    alpha_cur, beta_cur = res[0]
+    alpha_cur, beta_cur = np.copy(res[0])
     if alpha_cur <= locs[0]:
         alpha_cur = locs[0]+0.1
     if beta_cur <= locs[1]:
@@ -320,7 +320,7 @@ def run_hierarchical(drug_channel):
     # but again, the starting point for MCMC is not too important
     # a bad starting position can increase the time you have to run MCMC for to get a "converged" output
     # at worst, it can get stuck in a local optimum, but we haven't found this to be a problem yet
-    mu_cur, s_cur = st.logistic.fit(best_fits[:,1])
+    mu_cur, s_cur = st.logistic.fit(best_fits[:,0])
     if mu_cur <= locs[2]:
         mu_cur = locs[2]+0.1
     if s_cur <= locs[3]:
@@ -537,9 +537,9 @@ def run_hierarchical(drug_channel):
             elif i==3:
                 y_label = r'$s$'
             elif (i%2==0)and(i<dim-1):
-                y_label = r'$Hill_{'+str(i/2-1)+'}$'
-            elif (i<dim-1):
                 y_label = r'$pIC50_{'+str(i/2-1)+'}$'
+            elif (i<dim-1):
+                y_label = r'$Hill_{'+str(i/2-1)+'}$'
             else:
                 y_label = r'$\sigma$'
                 ax.set_xlabel('Iteration (thinned)')

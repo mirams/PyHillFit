@@ -82,7 +82,10 @@ def run(drug_channel):
     subset_idx = npr.randint(0, args.num_hist_samples, args.num_samples)
     for i in xrange(args.num_samples):  # only plot the first T of the H samples (should be fine because they're all randomly selected)
         ax1.plot(concs,dr.dose_response_model(concs, hill_samples[i], dr.pic50_to_ic50(pic50_samples[i])),color='black', alpha=0.01)
-    ax1.legend(loc=2,fontsize=10)
+    
+    lfs = 8
+    
+    ax1.legend(loc=2,fontsize=lfs)
     
     
     ax2 = fig.add_subplot(234)
@@ -94,7 +97,7 @@ def run(drug_channel):
         ax2.hist(dr.dose_response_model(conc,hill_samples,dr.pic50_to_ic50(pic50_samples)),bins=50,normed=True,color=colors[3+i],alpha=0.8,edgecolor='none',label=r"{} $\mu$M {}".format(conc,drug))
     
     ax2.set_title('D. Hierarchical predicted\nfuture experiments')
-    ax2.legend(loc=2,fontsize=10)
+    ax2.legend(loc="best",fontsize=lfs)
     
     ax3 = fig.add_subplot(232, sharey=ax1, sharex=ax1)
     ax3.grid()
@@ -116,7 +119,7 @@ def run(drug_channel):
         ax3.axvline(conc, color=colors[3+i], lw=2, label=r"{} $\mu$M".format(conc), alpha=0.8)
     for i in xrange(args.num_samples):
         ax3.plot(concs,dr.dose_response_model(concs,alpha_samples[i],dr.pic50_to_ic50(mu_samples[i])),color='black',alpha=0.01)
-    ax3.legend(loc=2,fontsize=10)
+    ax3.legend(loc=2,fontsize=lfs)
     ax4 = fig.add_subplot(235, sharey=ax2, sharex=ax2)
     ax4.set_xlim(0,100)
     ax4.set_xlabel(r'% {} block'.format(channel))
@@ -159,7 +162,7 @@ def run(drug_channel):
     ax5.set_xlim(10**xmin,10**xmax)
     ax5.set_xlabel(r'{} concentration ($\mu$M)'.format(drug))
     ax5.set_title('C. Single-level inferred\neffects')
-    ax4.legend(loc=2, fontsize=10)
+    ax4.legend(loc="best", fontsize=lfs)
     
     for expt in experiment_numbers:
         if expt==1:
@@ -172,7 +175,7 @@ def run(drug_channel):
     for i in xrange(args.num_samples):
         pic50, hill = samples[i, :]
         ax5.plot(concs,dr.dose_response_model(concs, hill, dr.pic50_to_ic50(pic50)),color='black',alpha=0.01)
-    ax5.legend(loc=2,fontsize=10)
+    ax5.legend(loc=2,fontsize=lfs)
     
     sample_indices = npr.randint(burn,end, args.num_hist_samples)
     samples = chain[sample_indices,:]
@@ -185,7 +188,7 @@ def run(drug_channel):
         ax6.hist(dr.dose_response_model(conc, samples[:,1], dr.pic50_to_ic50(samples[:,0])),bins=50,normed=True,alpha=0.8,color=colors[3+i],edgecolor='none',label=r"{} $\mu$M {}".format(conc,drug))
     ax6.set_title('F. Single-level inferred\neffects')
 
-    ax6.legend(loc=2,fontsize=10)
+    ax6.legend(loc="best",fontsize=lfs)
     
     
     

@@ -31,7 +31,7 @@ parser.add_argument("-b", "--burn-in-fraction", type=int, help="given N saved MC
 parser.add_argument("-a", "--all", action='store_true', help='run hierarchical MCMC on all drugs and channels', default=False)
 parser.add_argument('-ppp', '--plot-parameter-paths', action='store_true', help='plot the path taken by each parameter through the (thinned) MCMC',default=False)
 parser.add_argument("-c", "--num-cores", type=int, help="number of cores to parallelise drug/channel combinations",default=1)
-parser.add_argument("-Ne", "--num_expts", type=int, help="how many experiments to fit to", default=0)
+parser.add_argument("-Ne", "--num-expts", type=int, help="how many experiments to fit to", default=0)
 parser.add_argument("--num-APs", type=int, help="how many (alpha,mu) samples to take for AP simulations", default=500)
 parser.add_argument("--hierarchical", action='store_true', help="run hierarchical MCMC algorithm",default=False)
 parser.add_argument("-bfo", "--best-fit-only", action='store_true', help="only do CMA-ES best fit, then quit",default=False)
@@ -242,7 +242,7 @@ def run_hierarchical(drug_channel):
             X = es.ask()
             es.tell(X, [sum_of_square_diffs(x,experiments[expt][:,0],experiments[expt][:,1]) for x in X])
         res = es.result
-        best_fits.append((res[0][0]**2,res[0][1]**2-1,initial_sigma(len(experiments[expt][:,0]),res[1])))
+        best_fits.append((res[0][0]**2, res[0][1]**2-1, initial_sigma(len(experiments[expt][:,0]),res[1])))
 
     best_fits = np.array(best_fits)
 
@@ -470,7 +470,7 @@ def run_hierarchical(drug_channel):
     start = time.time()
     t = 1
     while t <= total_iterations:
-        theta_star = npr.multivariate_normal(theta_cur,np.exp(loga)*cov_cur)
+        theta_star = npr.multivariate_normal(theta_cur, np.exp(loga)*cov_cur)
         log_target_star = log_target_distribution(experiments,theta_star,shapes,scales,locs)
         accept_prob = npr.rand()
         if (np.log(accept_prob) < log_target_star - log_target_cur):

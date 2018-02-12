@@ -4,7 +4,7 @@
 import doseresponse as dr
 import matplotlib
 #matplotlib.rc('font', family='ubuntu')
-#matplotlib.use('Agg')
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import argparse
 import itertools as it
@@ -83,7 +83,7 @@ def run(drug_channel):
     for i in xrange(args.num_samples):  # only plot the first T of the H samples (should be fine because they're all randomly selected)
         ax1.plot(concs,dr.dose_response_model(concs, hill_samples[i], dr.pic50_to_ic50(pic50_samples[i])),color='black', alpha=0.01)
     
-    lfs = 8
+    lfs = 9
     
     ax1.legend(loc=2,fontsize=lfs)
     

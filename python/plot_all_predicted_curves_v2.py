@@ -96,9 +96,6 @@ def run(drug_channel):
     ax2.set_title('D. Hierarchical predicted\nfuture experiments')
     ax2.legend(loc=2,fontsize=10)
     
-    plt.show()
-    sys.exit()
-        
     ax3 = fig.add_subplot(232,sharey=ax1)
     ax3.grid()
     xmin = -4
@@ -199,8 +196,12 @@ def run(drug_channel):
     plot_dir = dr.all_predictions_dir(drug,channel)
     
     fig.tight_layout()
-    fig.savefig(plot_dir+'{}_{}_all_predictions.png'.format(drug,channel))
-    fig.savefig(plot_dir+'{}_{}_all_predictions.pdf'.format(drug,channel)) # uncomment to save as pdf, or change extension to whatever you want
+    png_file = plot_dir+'{}_{}_all_predictions_corrected.png'.format(drug,channel)
+    print png_file
+    fig.savefig(png_file)
+    pdf_file = plot_dir+'{}_{}_all_predictions_corrected.pdf'.format(drug,channel)
+    print pdf_file
+    fig.savefig(pdf_file) # uncomment to save as pdf, or change extension to whatever you want
     
 
     plt.close()

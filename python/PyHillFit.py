@@ -274,6 +274,8 @@ def run_hierarchical(drug_channel):
         
     if (not skip_best_fits_plot):
         for expt in experiment_numbers:
+            print "best_fits:", best_fits
+            print "best_fits[{}]:".format(expt), best_fits[expt]
             ax.plot(x, dr.dose_response_model(x, best_fits[expt,1], dr.pic50_to_ic50(best_fits[expt,0])),color=colors[expt],lw=2)
             ax.scatter(experiments[expt][:,0],experiments[expt][:,1],label='Expt {}'.format(expt+1),color=colors[expt],s=100)
         ax.set_ylim(0,100)
@@ -966,12 +968,13 @@ elif (not args.hierarchical): # assume single-level MCMC if hierarchical not spe
 drugs_channels = it.product(drugs_to_run,channels_to_run)
 if (args.num_cores<=1) or (len(drugs_to_run)==1):
     for drug_channel in drugs_channels:
-        try:
-            run(drug_channel)
-        except KeyboardInterrupt:
-            sys.exit("\nAborting everything\n")
-        except:
-            print "Failed to run", drug_channel
+        run(drug_channel)
+        #try:
+        #    run(drug_channel)
+        #except KeyboardInterrupt:
+        #    sys.exit("\nAborting everything\n")
+        #except:
+        #    print "Failed to run", drug_channel
         # try/except is good when running multiple MCMCs and leaving them overnight,say
         # if one or more crash then the others will survive!
         # however, if you need more "control", comment out the try/except, and uncomment the other run(drug_channel) line

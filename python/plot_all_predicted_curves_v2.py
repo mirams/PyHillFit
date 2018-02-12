@@ -57,7 +57,7 @@ def run(drug_channel):
         pic50_samples[t] = st.logistic.rvs(mu, s)
     
     
-    num_pts = 50
+    num_pts = 40
     fig = plt.figure(figsize=(11,7))
     
     
@@ -176,6 +176,7 @@ def run(drug_channel):
     for i, conc in enumerate(args.concs):
         ax5.axvline(conc,color=colors[3+i],alpha=0.8,lw=2,label=r"{} $\mu$M".format(conc))
     for i in xrange(args.num_samples):
+        print "(hill, pic50) =", samples[i, :]
         ax5.plot(concs,dr.dose_response_model(concs,samples[i,0],dr.pic50_to_ic50(samples[i,1])),color='black',alpha=0.01)
     ax5.legend(loc=2,fontsize=10)
     

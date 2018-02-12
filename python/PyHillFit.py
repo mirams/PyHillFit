@@ -245,7 +245,7 @@ def run_hierarchical(drug_channel):
             X = es.ask()
             es.tell(X, [sum_of_square_diffs(x**2+pic50_hill_priors_lowers,experiments[expt][:,0],experiments[expt][:,1]) for x in X])
         res = es.result
-        best_fits.append((res[0]**2+pic50_hill_priors_lowers, initial_sigma(len(experiments[expt][:,0]),res[1])))
+        best_fits.append(np.concatenate((res[0]**2+pic50_hill_priors_lowers, [initial_sigma(len(experiments[expt][:,0]),res[1])])))
 
     best_fits = np.array(best_fits)
 

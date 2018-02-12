@@ -142,7 +142,12 @@ def run(drug_channel):
     # now plot non-hierarchical
     
     num_params = 3
-    drug,channel,chain_file,figs_dir = dr.nonhierarchical_chain_file_and_figs_dir(drug, channel, args.fix_hill)
+    temperature = 1
+    if args.fix_hill:
+        model = 1
+    else:
+        model = 2
+    drug,channel,chain_file,figs_dir = dr.nonhierarchical_chain_file_and_figs_dir(model, drug, channel, temperature)
     chain = np.loadtxt(chain_file,usecols=range(num_params-1)) # not interested in log-target values right now
     end = chain.shape[0]
     burn = end/4

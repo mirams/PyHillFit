@@ -96,11 +96,8 @@ def run(drug_channel):
     ax2.set_title('D. Hierarchical predicted\nfuture experiments')
     ax2.legend(loc=2,fontsize=10)
     
-    ax3 = fig.add_subplot(232,sharey=ax1)
+    ax3 = fig.add_subplot(232, sharey=ax1, sharex=ax1)
     ax3.grid()
-    xmin = -4
-    xmax = 3
-    concs = np.logspace(xmin,xmax,num_pts)
     ax3.set_xscale('log')
     ax3.set_ylim(0,100)
     ax3.set_xlabel(r'{} concentration ($\mu$M)'.format(drug))
@@ -120,7 +117,7 @@ def run(drug_channel):
     for i in xrange(args.num_samples):
         ax3.plot(concs,dr.dose_response_model(concs,alpha_samples[i],dr.pic50_to_ic50(mu_samples[i])),color='black',alpha=0.01)
     ax3.legend(loc=2,fontsize=10)
-    ax4 = fig.add_subplot(235,sharey=ax2)
+    ax4 = fig.add_subplot(235, sharey=ax2, sharex=ax2)
     ax4.set_xlim(0,100)
     ax4.set_xlabel(r'% {} block'.format(channel))
     ax4.grid()
@@ -154,18 +151,15 @@ def run(drug_channel):
     samples = chain[sample_indices, :]
     
     
-    ax5 = fig.add_subplot(233, sharey=ax1)
+    ax5 = fig.add_subplot(233, sharey=ax1, sharex=ax1)
     ax5.grid()
     plt.setp(ax5.get_yticklabels(), visible=False)
-    xmin = -4
-    xmax = 4
-    concs = np.logspace(xmin,xmax,num_pts)
     ax5.set_xscale('log')
     ax5.set_ylim(0,100)
     ax5.set_xlim(10**xmin,10**xmax)
     ax5.set_xlabel(r'{} concentration ($\mu$M)'.format(drug))
     ax5.set_title('C. Single-level inferred\neffects')
-    ax5.legend(fontsize=10)
+    ax4.legend(loc=2, fontsize=10)
     
     for expt in experiment_numbers:
         if expt==1:
@@ -182,7 +176,7 @@ def run(drug_channel):
     
     sample_indices = npr.randint(burn,end, args.num_hist_samples)
     samples = chain[sample_indices,:]
-    ax6 = fig.add_subplot(236, sharey=ax2)
+    ax6 = fig.add_subplot(236, sharey=ax2, sharex=ax2)
     ax6.set_xlim(0,100)
     ax6.set_xlabel(r'% {} block'.format(channel))
     plt.setp(ax6.get_yticklabels(), visible=False)
@@ -191,7 +185,7 @@ def run(drug_channel):
         ax6.hist(dr.dose_response_model(conc, samples[:,1], dr.pic50_to_ic50(samples[:,0])),bins=50,normed=True,alpha=0.8,color=colors[3+i],edgecolor='none',label=r"{} $\mu$M {}".format(conc,drug))
     ax6.set_title('F. Single-level inferred\neffects')
 
-    ax2.legend(loc=2,fontsize=10)
+    ax6.legend(loc=2,fontsize=10)
     
     
     

@@ -94,7 +94,7 @@ def run(drug_channel):
     ax2.set_ylabel(r'Probability density')
     ax2.grid()
     for i, conc in enumerate(args.concs):
-        ax2.hist(dr.dose_response_model(conc,hill_samples,dr.pic50_to_ic50(pic50_samples)),bins=50,normed=True,color=colors[3+i],alpha=0.8,edgecolor='none',label=r"{} $\mu$M {}".format(conc,drug))
+        ax2.hist(dr.dose_response_model(conc,hill_samples,dr.pic50_to_ic50(pic50_samples)),bins=50,normed=True,color=colors[3+i],alpha=0.8,lw=0,label=r"{} $\mu$M {}".format(conc,drug))
     
     ax2.set_title('D. Hierarchical predicted\nfuture experiments')
     ax2.legend(loc="best",fontsize=lfs)
@@ -130,7 +130,7 @@ def run(drug_channel):
     mus = chain[hist_indices,2]
     
     for i, conc in enumerate(args.concs):
-        ax4.hist(dr.dose_response_model(conc,alphas,dr.pic50_to_ic50(mus)),bins=50,normed=True,color=colors[3+i],alpha=0.8,edgecolor='none',label=r"{} $\mu$M {}".format(conc,drug))
+        ax4.hist(dr.dose_response_model(conc,alphas,dr.pic50_to_ic50(mus)),bins=50,normed=True,color=colors[3+i],alpha=0.8,lw=0,label=r"{} $\mu$M {}".format(conc,drug))
     ax4.set_title('E. Hierarchical inferred\nunderlying effects')
     
     plt.setp(ax3.get_yticklabels(), visible=False)
@@ -185,7 +185,7 @@ def run(drug_channel):
     plt.setp(ax6.get_yticklabels(), visible=False)
     ax6.grid()
     for i, conc in enumerate(args.concs):
-        ax6.hist(dr.dose_response_model(conc, samples[:,1], dr.pic50_to_ic50(samples[:,0])),bins=50,normed=True,alpha=0.8,color=colors[3+i],edgecolor='none',label=r"{} $\mu$M {}".format(conc,drug))
+        ax6.hist(dr.dose_response_model(conc, samples[:,1], dr.pic50_to_ic50(samples[:,0])),bins=50,normed=True,alpha=0.8,color=colors[3+i],lw=0,label=r"{} $\mu$M {}".format(conc,drug))
     ax6.set_title('F. Single-level inferred\neffects')
 
     ax6.legend(loc="best",fontsize=lfs)

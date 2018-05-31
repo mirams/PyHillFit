@@ -18,11 +18,13 @@ try:
     import cma
 except:
     sys.exit("couldn't find module cma")
-    
-latest_tested_version = 2.6
-installed_version = float(".".join(cma.__version__.split()[0].split(".")[:2]))
-if installed_version < latest_tested_version:
-    sys.exit("Old version of cma installed. Please upgrade here to use PyHillFit: https://pypi.org/project/cma/")
+
+from distutils.version import LooseVersion
+latest_tested_version = "2.6.0"
+installed_version = cma.__version__.split()[0]
+if LooseVersion(installed_version) < LooseVersion(latest_tested_version):
+    print "Version {} of cma installed. Latest tested version is {}.".format(installed_version, latest_tested_version)
+    sys.exit("Please upgrade cma to use PyHillFit: https://pypi.org/project/cma/")
 
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm

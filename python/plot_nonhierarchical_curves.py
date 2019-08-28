@@ -15,7 +15,7 @@ npr.seed(seed)
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument("-a", "--all", action='store_true', help='run hierarchical MCMC on all drugs and channels', default=False)
+parser.add_argument("-a", "--all", action='store_true', help='plot graphs for all drugs and channels', default=False)
 parser.add_argument("-c", "--num-cores", type=int, help="number of cores to parallelise drug/channel combinations",default=1)
 
 requiredNamed = parser.add_argument_group('required arguments')

@@ -87,7 +87,7 @@ def do_plots(drug_channel):
     rand_idx = npr.randint(saved_its, size=num_curves)
 
     pic50s = chain[rand_idx, 0]
-    ax1.set_title(r"Model 1: vary $pIC50, \sigma$, fix $Hill=1$")
+    ax1.set_title(r'Model 1: $pIC50 = {}$, fixed $Hill = 1$'.format(np.round(best_pic50,2)))
     for i in xrange(num_curves):
         ax1.plot(x, dr.dose_response_model(x, 1., dr.pic50_to_ic50(pic50s[i])), color='black', alpha=0.02)
     max_pd_curve = dr.dose_response_model(x, 1., dr.pic50_to_ic50(best_pic50))
@@ -111,7 +111,7 @@ def do_plots(drug_channel):
     best_idx = np.argmax(chain[:,-1])
     best_pic50, best_hill, best_sigma = chain[best_idx, [0,1,2]]
     
-    ax2.set_title(r"Model 2: vary $pIC50, Hill, \sigma$")
+    ax2.set_title(r"Model 2: $pIC50={}$, Hill = {}".format(np.round(best_pic50,2),np.round(best_hill,2)))
     
     saved_its, h = chain.shape
     rand_idx = npr.randint(saved_its, size=num_curves)

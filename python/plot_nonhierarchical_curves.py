@@ -27,7 +27,7 @@ if len(sys.argv)==1:
 
 args = parser.parse_args()
 
-temperature = 1.0
+temperature = 1
 
 # load data from specified data file
 dr.setup(args.data_file)
@@ -56,11 +56,12 @@ def do_plots(drug_channel):
     for expt in experiments:
         a = np.min(expt[:,0])
         b = np.max(expt[:,0])
-        if a < xmin:
+        if a > 0 and a < xmin:
             xmin = a
         if b > xmax:
             xmax = b
-    xmin = int(np.log10(xmin))-1
+     
+    xmin = int(np.log10(xmin))-2
     xmax = int(np.log10(xmax))+3
 
     x = np.logspace(xmin,xmax,num_pts)

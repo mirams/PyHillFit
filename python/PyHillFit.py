@@ -757,7 +757,10 @@ def run_single_level(drug_channel):
     best_fit_ax = best_fit_fig.add_subplot(111)
     best_fit_ax.set_xscale('log')
     best_fit_ax.grid()
-    plot_lower_lim = int(np.log10(np.min(concs)))-1
+    if np.min(concs) == 0:
+        plot_lower_lim = int(np.log10(np.min(concs[np.nonzero(concs)])))-2
+    else:
+        plot_lower_lim = int(np.log10(np.min(concs)))-2
     plot_upper_lim = int(np.log10(np.max(concs)))+2
     best_fit_ax.set_xlim(10**plot_lower_lim,10**plot_upper_lim)
     best_fit_ax.set_ylim(0,100)

@@ -7,6 +7,8 @@ This code is associated with the paper "*Hierarchical Bayesian inference for ion
 
 ![schematic of PyHillFit inputs and outputs](https://github.com/mirams/PyHillFit/blob/master/schematic.png)
 
+N.B. The response should be the percentage inhibition.
+
 ## Pre-requisites
 
 The following python packages are pre-requisites for running `PyHillFit`:

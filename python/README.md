@@ -52,14 +52,27 @@ Everything will be saved in `python/output/...` plus a very verbose and hopefull
 Input data should be a csv file in the same format as data/crumb_data.csv, with one header line: "Compound,Channel,Experiment,Dose(uM),Response(%inhibition)".
 Each data file can have as many compounds and channels as required. Note that doses should be given in microMolar, as the conversion to pIC50 is hard-coded to these units.
 
-# PyHillTemp
+# Bayes Factor calculations with PyHillTemp
 
-PyHillTemp runs the same MCMC code as PyHillFit, except at different temperatures, i.e. the likelihood is raised to the power t (the temperature) where 0 <= t <= 1.
+PyHillTemp runs the same MCMC code as (non-hierarchical) PyHillFit, except at different temperatures, i.e. the likelihood is raised to the power t (the temperature) where 0 <= t <= 1.
 
 t = 1 is the full likelihood and therefore "normal" MCMC.
 
 These different temperatures are for approximating Bayes factors using thermodynamic integration.
 
-I'll hopefully add some more documentation for it later, but don't worry about it for now.
-
 "Temp" = "Temperature", not "Temporary"!
+
+A bash script like this runs for a range of compounds and channels:
+```
+for channel in 0 1 2 3 <...>
+do
+    for drug in 0 1 2 3 <...>
+    do
+          for model in 1 2
+          do
+              python python/PyHillTemp.py --data-file ~/data.csv -m ${model} -a -nc 16 -d ${drug} -c ${channel}
+          done
+          python python/compute_bayes_factors.py --data-file ~/data.csv -d ${drug} -c ${channel}
+    done
+done
+```
